@@ -40,8 +40,9 @@ function Footer() {
                 </span>
               </Link>{" "}
             </div>
-            <div className="text-gray-200 text-base flex justify-center items-center">
-              <RiCopyrightLine className="inline-block" />{" "}
+            <div className="text-gray-200 text-base font-bold flex justify-center items-center gap-2">
+              <RiCopyrightLine className="inline-block" />
+              {" "}
               <span>Infoverse AI 2023</span>
             </div>
           </div>
