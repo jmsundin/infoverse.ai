@@ -2,197 +2,320 @@
 
 import { Fragment, useRef, useState, useEffect } from "react";
 import * as d3 from "d3";
-import { aboutMe } from "@/data/about-me";
-import { v4 as uuidv4 } from "uuid";
 
-function Graph() {
+import { BsWikipedia } from "react-icons/bs";
+import { node } from "prop-types";
+
+function Graph({ data, graphContainer, handleWikipediaPageLoad }) {
   const tooltipRef = useRef();
+  const tooltipTitleRef = useRef();
+  const tooltipDescriptionRef = useRef();
+  const tooltipMenuRef = useRef();
+  const tooltipWikipediaIconRef = useRef();
+
+  const [focusedNodeQID, setFocusedNodeQID] = useState("");
+  const [wikipediaPageUrl, setWikipediaPageUrl] = useState("");
+
   const svgRef = useRef();
+  const width = useRef(graphContainer?.current?.width || 930);
+  const height = useRef(graphContainer?.current?.height || 700);
 
-  // Specify the chart’s dimensions.
-  const width = 960;
-  const height = 700;
-  const scale = 0.6;
-
-  // Compute the graph and start the force simulation.
-  const root = d3.hierarchy(aboutMe);
-  const links = root.links();
-  const nodes = root.descendants();
-  nodes.forEach((d) => {
-    d.id = uuidv4();
-  });
-
-  const simulation = useRef(null);
-  const svg = useRef(null);
-  const link = useRef(null);
-  const node = useRef(null);
-  const label = useRef(null);
+  const root = useRef();
+  const nodes = useRef();
+  const links = useRef();
+  const simulation = useRef();
 
   useEffect(() => {
+    async function getWikipediaPageUrl(QID) {
+      const mediaWikiApi =
+        `https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids=` +
+        QID +
+        `&sitefilter=enwiki&origin=*`;
+
+      let response = null;
+      try {
+        response = await fetch(mediaWikiApi);
+      } catch (error) {
+        console.log(error);
+      }
+      let data = null;
+      try {
+        data = await response?.text();
+      } catch (error) {
+        console.log(error);
+      }
+      const parser = new DOMParser();
+      let xmlDoc = null;
+      try {
+        xmlDoc = parser.parseFromString(data, "text/xml");
+      } catch (error) {
+        console.log(error);
+      }
+
+      let wikipediaPageTitle = null;
+      if (xmlDoc !== null && xmlDoc !== undefined && xmlDoc !== "") {
+        const siteLink = xmlDoc.getElementsByTagName("sitelink")[0];
+        if (siteLink !== null && siteLink !== undefined) {
+          wikipediaPageTitle = siteLink.getAttribute("title");
+        }
+      }
+
+      let url = null;
+      if (wikipediaPageTitle !== null && wikipediaPageTitle !== undefined) {
+        url =
+          "https://en.wikipedia.org/wiki/" +
+          wikipediaPageTitle.replace(" ", "_");
+      }
+      setWikipediaPageUrl(url);
+    }
+
+    getWikipediaPageUrl(focusedNodeQID);
+  }, [focusedNodeQID]);
+
+  useEffect(() => {
+
+    root.current = d3.hierarchy(data);
+    nodes.current = root.current.descendants();
+    links.current = root.current.links();
+
+    const nodePaddingX = 60;
+    const nodePaddingY = 20;
+
     simulation.current = d3
-      .forceSimulation(nodes)
+      .forceSimulation(nodes.current)
       .force(
         "link",
         d3
-          .forceLink(links)
-          .id((d) => d.id)
-          .distance((d) => {
-            if (d.source.data.name === "Jon Sundin") return 40;
-            else if (
-              d.source.data.children &&
-              d.source.data.name !== "Jon Sundin"
-            ) {
-              return 10;
-            }
-
-            return 1;
-          })
+          .forceLink(links.current)
+          .id((d) => d.data.qid)
+          .distance(300)
+          .strength(0.1)
       )
-      .force("charge", d3.forceManyBody().strength(-300))
-      .force("collide", d3.forceCollide().radius(70))
+      .force("collide", d3.forceCollide().radius(100))
       .force("x", d3.forceX())
       .force("y", d3.forceY());
 
     // Create the container SVG.
-    svg.current = d3
+    const svgSelection = d3
       .select(svgRef.current)
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [-width / 2, -height / 2, width, height])
-      .attr("style", "max-width: 100%; height: auto;");
+      .attr("viewBox", [-width.current / 2, -height.current / 2, width.current, height.current])
+      .classed("bg-gradient-to-r", true)
+      .classed("from-indigo-300", true)
+      .classed("to-indigo-100", true)
+      .classed("rounded-lg", true)
+      .classed("w-full", true)
+      .classed("h-full", true)
+      .classed("mx-auto", true);
 
-    // Append links.
-    link.current = svg.current
+    const linkSelection = svgSelection
       .append("g")
+      .attr("id", "links")
       .attr("stroke", "#000")
       .attr("stroke-width", 1)
       .selectAll("line")
-      .data(links)
+      .data(links.current)
       .join("line")
-      .attr("id", (d) => `line__${d.source.name}-->${d.target.name}`);
+      .attr("id", (d) => `link__${d.source.data.qid}__${d.target.data.qid}`)
+      .attr("marker-end", (d) => {
+        return `url(#marker__${d.target.data.qid})`;
+      });
 
     // Append nodes.
-    node.current = svg.current
+    const nodeSelection = svgSelection
       .append("g")
+      .classed("nodeGroup", true)
       .selectAll("rect")
-      .data(nodes)
+      .data(nodes.current)
       .join("rect")
-      .attr("id", (d) => `node__${d.data.name}`)
-      .attr("fill", (d) => {
-        if (d.depth == 0) return "#fff";
-        else if (d.depth == 1 && d.data.children) return "#fff";
-        else if (d.depth == 2 && d.data.children) return "#eee";
-        else if (d.depth == 3 && d.data.children) return "#fff";
-        else if (d.depth == 4 && d.data.children) return "#eee";
-        return "#000";
-      })
-      .attr("stroke", (d) => {
-        if (d.depth == 0) return "#000";
-        else if (d.depth > 0 && d.data.children) return "#000";
-        return "#fff";
-      })
-      .attr("width", (d) => {
-        if (d.depth == 0) return String(d.data.name.length * 12) + "px";
-        else if (d.depth > 0 && d.data.children)
-          return String(d.data.name.length * 10) + "px";
-        return "20px";
-      })
-      .attr("height", (d) => {
-        if (d.depth == 0) return "40px";
-        else if (d.depth > 0 && d.data.children) return "30px";
-        return "20px";
-      })
-      .attr("rx", 15)
-      .attr("ry", 15)
+      .attr("id", (d) => `node__${d.data.qid}`)
+      .attr("fill", "#fff")
+      .attr("stroke", "#000")
+      .attr("rx", "15px")
+      .attr("ry", "15px")
       .classed("node", true)
-      .classed("relative", true)
-      .on("mouseover", (e, d) => {
-        if (d.data.children) return;
-        const tooltip = d3.select(tooltipRef.current);
-        tooltip
-          .style("opacity", 1)
-          .style("left", `${e.pageX}px`)
-          .style("top", `${e.pageY}px`)
-          .attr("width", d.data.name.length * 10)
-          .attr("height", 20)
-          .html(d.data.name)
-          .classed("invisible", false)
-          .classed("visible", true);
-      })
-      .on("mouseout", (e, d) => {
-        const tooltip = d3.select(tooltipRef.current);
-        tooltip.classed("invisible", true);
-      })
-      .call(drag(simulation));
+      .classed("relative", true);
 
-    // Append labels.
-    label.current = svg.current
+    const nodeTextSelection = svgSelection
       .append("g")
+      .classed("nodeTextGroup", true)
       .attr("font-family", "sans-serif")
       .attr("font-size", 10)
       .selectAll("text")
-      .data(nodes)
+      .data(nodes.current)
       .join("text")
-      .text((d) => d.data.name)
-      .attr("id", (d) => `label__${d.data.name}`)
-      .attr("dx", (d) => {
-        if (d.data.name === "Jon Sundin")
-          return String(d.data.name.length * 6) + "px";
-        else if (d.data.children && d.data.name !== "Jon Sundin")
-          return String(d.data.name.length * 5) + "px";
-      })
-      .attr("dy", (d) => {
-        if (d.data.name === "Jon Sundin") return "25px";
-        return "20px";
-      })
-      .classed("text-lg", (d) => {
-        if (d.data.name === "Jon Sundin") return true;
+      .text((d) => d.data.label)
+      .attr("id", (d) => `nodeText__${d.data.qid}`)
+      .attr("text-anchor", "middle")
+      .classed("text-2xl", (d) => {
+        if (d.data.value > 1) {
+          return true;
+        }
         return false;
       })
-      .classed("text-sm", (d) => {
-        if (d.data.name !== "Jon Sundin") return true;
-        return false;
-      })
-      .classed("font-bold", (d) => {
-        if (d.data.name === "Jon Sundin") return true;
-        return false;
-      })
-      .attr("text-anchor", (d) => {
-        if (d.data.name === "Jon Sundin" || d.data.children) return "middle";
-        return "start";
-      })
-      .attr("cursor", "default")
-      .attr("transform", (d) => `translate(${d.x},${d.y})`)
-      .classed("label", true)
-      .classed("invisible", (d) => {
-        if (d.data.children) return false;
+      .classed("text-base", (d) => {
+        if (d.data.value > 1) {
+          return false;
+        }
         return true;
       })
-      .classed("relative", true)
+      .classed("font-bold", (d) => {
+        if (d.data.value > 1) {
+          return true;
+        }
+        return false;
+      })
+      .attr("cursor", "default")
+      .classed("label", true)
+      .classed("relative", true);
+
+    // Setting the width of the node to the width of the text + padding.
+    nodeSelection
+      .attr("width", (d) => {
+        const nodeTextWidth = d3
+          .select(`#nodeText__${d.data.qid}`)
+          .node()
+          .getBoundingClientRect().width;
+        return nodeTextWidth + nodePaddingX + "px";
+      })
+      .attr("height", (d) => {
+        const nodeTextHeight = d3
+          .select(`#nodeText__${d.data.qid}`)
+          .node()
+          .getBoundingClientRect().height;
+        return nodeTextHeight + nodePaddingY + "px";
+      })
       .on("mouseover", (e, d) => {
-        if (d.data.children) return;
+        setFocusedNodeQID(d.data.qid);
         const tooltip = d3.select(tooltipRef.current);
         tooltip
           .style("opacity", 1)
-          .style("left", String(e.pageX) + "px")
-          .style("top", String(e.pageY) + "px")
-          .attr("width", d.data.name.length * 10)
-          .attr("height", 20)
-          .html(d.data.name)
+          .style("left", e.pageX + "px")
+          .style("top", e.pageY + "px")
+          .classed("rounded-lg", true)
+          .classed("p-2", true)
+          .classed("bg-indigo-100", true)
+          .classed("z-10", true)
           .classed("invisible", false)
           .classed("visible", true);
+
+        d3.select(tooltipTitleRef.current)
+          .classed("text-2xl", true)
+          .classed("font-bold", true)
+          .html(d.data.label);
+        d3.select(tooltipDescriptionRef.current)
+          .classed("text-base", true)
+          .classed("font-normal", true)
+          .classed("mt-2", true)
+          .html(`<strong>Description:</strong> ${d.data.description}`);
+        d3.select(tooltipMenuRef.current)
+          .classed("flex", true)
+          .classed("flex-row", true)
+          .classed("justify-center", true)
+          .classed("space-x-2", true)
+          .classed("items-center", true)
+          .classed("mt-2", true)
+          .classed("text-2xl", true);
       })
-      .on("mouseout", (e, d) => {
+      // .on("mouseout", (e, d) => {
+      //   const tooltip = d3.select(tooltipRef.current);
+      //   tooltip.classed("invisible", true);
+      // })
+      .call(drag(simulation.current));
+
+    // Setting the x and y of the text to the center of the node.
+    nodeTextSelection
+      .attr("dx", (d) => {
+        const nodeWidth = d3
+          .select(`#node__${d.data.qid}`)
+          .node()
+          .getBBox().width;
+        return nodeWidth / 2 + "px";
+      })
+      .attr("dy", (d) => {
+        const nodeHeight = d3
+          .select(`#node__${d.data.qid}`)
+          .node()
+          .getBBox().height;
+        const nodeTextHeight = d3
+          .select(`#nodeText__${d.data.qid}`)
+          .node()
+          .getBBox().height;
+        return nodeHeight / 2 + nodeTextHeight / 4 + "px";
+      })
+      .on("mouseover", (e, d) => {
+        setFocusedNodeQID(d.data.qid);
         const tooltip = d3.select(tooltipRef.current);
-        tooltip.classed("invisible", true);
+        tooltip
+          .style("opacity", 1)
+          .style("left", e.x + "px")
+          .style("top", e.y + "px")
+          .classed("rounded-lg", true)
+          .classed("p-2", true)
+          .classed("bg-indigo-100", true)
+          .classed("z-10", true)
+          .classed("invisible", false)
+          .classed("visible", true);
+
+        d3.select(tooltipTitleRef.current)
+          .classed("text-2xl", true)
+          .classed("font-bold", true)
+          .html(d.data.label);
+        d3.select(tooltipDescriptionRef.current)
+          .classed("text-base", true)
+          .classed("font-normal", true)
+          .classed("mt-2", true)
+          .html(`<strong>Description:</strong> ${d.data.description}`);
+        d3.select(tooltipMenuRef.current)
+          .classed("flex", true)
+          .classed("flex-row", true)
+          .classed("justify-center", true)
+          .classed("space-x-2", true)
+          .classed("items-center", true)
+          .classed("mt-2", true)
+          .classed("text-2xl", true);
+        d3.select(tooltipWikipediaIconRef.current)
+          .classed("cursor-pointer", true)
+          .classed("border-solid", true)
+          .classed("border-2", true)
+          .classed("border-gray-500", true)
+          .classed("rounded-lg", true)
+          .classed("hover:border-indigo-500", true);
       })
-      .call(drag(simulation));
+      .call(drag(simulation.current));
+
+    const markerSelection = svgSelection
+      .append("g")
+      .attr("id", "markers")
+      .append("defs")
+      .selectAll("marker")
+      .data(links.current)
+      .join("marker")
+      .attr("id", (d) => `marker__${d.target.data.qid}`)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("orient", "auto-start-reverse");
+
+    // Adding the arrow path to the marker.
+    markerSelection
+      .append("path")
+      .attr("id", (d) => `arrow__${d.target.data.qid}`)
+      .attr("fill", "#000")
+      .attr("d", "M0,-5L10,0L0,5");
+
+    const tooltipSelection = d3.select(tooltipRef.current);
+
+    svgSelection.on("click", (e, d) => {
+      const tooltip = d3.select(tooltipRef.current);
+      tooltip.classed("invisible", true);
+      setFocusedNodeQID("");
+    });
 
     const zoom = d3.zoom().on("zoom", handleZoom);
 
     function drag(simulation) {
       function dragstarted(event, d) {
-        if (!event.active) simulation.current.alphaTarget(0.3).restart();
+        if (!event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
       }
@@ -203,7 +326,7 @@ function Graph() {
       }
 
       function dragended(event, d) {
-        if (!event.active) simulation.current.alphaTarget(0);
+        if (!event.active) simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
       }
@@ -224,57 +347,125 @@ function Graph() {
 
     initZoom();
 
-    node.current.append("title").text((d) => d.data.name);
-    simulation.current.on("tick", () => {
+    simulation.current.on("tick", tick);
+    function tick() {
       try {
-        link.current
+        nodeSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
+      } catch (error) {
+        console.log(error);
+      }
+      try {
+        nodeTextSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
+      } catch (error) {
+        console.log(error);
+      }
+
+      try {
+        linkSelection
           .attr("x1", (d) => {
-            if (d.source.data.name === "Jon Sundin")
-              return d.source.x + d.source.data.name.length * 6;
-            else if (d.source.data.children)
-              return d.source.x + d.source.data.name.length * 4;
-            return d.source.x + 10;
+            const nodeWidth = d3
+              .select(`#node__${d.source.data.qid}`)
+              .node()
+              .getBBox().width;
+            return d.source.x + nodeWidth / 2 + "px";
           })
           .attr("y1", (d) => {
-            if (d.source.data.name === "Jon Sundin") return d.source.y + 15;
-            else if (d.source.data.children) return d.source.y + 12.5;
-            return d.source.y + 10;
+            const nodeHeight = d3
+              .select(`#node__${d.source.data.qid}`)
+              .node()
+              .getBBox().height;
+            return d.source.y + nodeHeight / 2;
           })
           .attr("x2", (d) => {
-            if (d.target.data.name === "Jon Sundin")
-              return d.target.x + d.target.data.name.length * 6;
-            else if (d.target.data.children)
-              return d.target.x + d.target.data.name.length * 4;
-            return d.target.x + 10;
+            const nodeWidth = d3
+              .select(`#node__${d.target.data.qid}`)
+              .node()
+              .getBBox().width;
+
+            return d.target.x + nodeWidth / 2 + "px";
           })
           .attr("y2", (d) => {
-            if (d.target.data.name === "Jon Sundin") return d.target.y + 15;
-            else if (d.target.data.children) return d.target.y + 12.5;
-            return d.target.y + 10;
+            const nodeHeight = d3
+              .select(`#node__${d.target.data.qid}`)
+              .node()
+              .getBBox().height;
+            return d.target.y + nodeHeight / 2;
           });
       } catch (error) {
         console.log(error);
       }
 
-      node.current.attr("x", (d) => d.x).attr("y", (d) => d.y);
+      // try {
+      //   markerSelection
+      //     .attr("refX", (d) => {
+      //       // find the x intercept of the line and the node
+      //       const x1 = d.source.x;
+      //       const y1 = d.source.y;
+      //       const x2 = d.target.x;
+      //       const y2 = d.target.y;
 
-      label.current.attr("transform", (d) => `translate(${d.x},${d.y})`);
-    });
-  }, [nodes, links]);
+      //       const m = (y2 - y1) / (x2 - x1); // slope
+
+      //       // get the x value when the y value is the height of the node / 2
+      //       const nodeHeight = d3
+      //         .select(`#node__${d.target.data.qid}`)
+      //         .node()
+      //         .getBoundingClientRect().height;
+
+      //       const y = nodeHeight / 2;
+      //       const b = y1 - m * x1; // y intercept
+      //       // y = mx + b;
+      //       // y - b = mx;
+      //       // (y - b) / m = x;
+
+      //       // const x = y - b / m + x1; // x intercept
+      //       const x = (y - 0) / m + x1; // x intercept
+
+      //       return x;
+      //     })
+      //     .attr("refY", (d) => {
+      //       const nodeHeight = d3
+      //         .select(`#node__${d.target.data.qid}`)
+      //         .node()
+      //         .getBoundingClientRect().height;
+      //       return nodeHeight / 2;
+      //     });
+      // } catch (error) {
+      //   console.log(error);
+      // }
+    }
+
+    return () => {
+      simulation.current.stop();
+    };
+  }, [data, graphContainer]);
 
   return (
     <Fragment>
-      <div
-        ref={tooltipRef}
-        className="invisible absolute z-10 bg-indigo-100 rounded-full p-2"
-      ></div>
-      <svg
-        ref={svgRef}
-        width="100%"
-        height="100%"
-        viewBox="0 0 930 700"
-        className="bg-gradient-to-r from-indigo-300 to-indigo-100 rounded-lg"
-      ></svg>
+      <div ref={tooltipRef} className="invisible absolute">
+        <div ref={tooltipTitleRef}></div>
+        <p ref={tooltipDescriptionRef}></p>
+        <div ref={tooltipMenuRef}>
+          {wikipediaPageUrl !== null && wikipediaPageUrl.length > 0 ? (
+            <Fragment>
+              <span className="text-sm">Wikipedia Page:</span>
+              <span
+                ref={tooltipWikipediaIconRef}
+                className="cursor-pointer border-solid border-2 border-gray-500 rounded-lg hover:border-indigo-500 hover:text-indigo-500"
+              >
+                <BsWikipedia
+                  onClick={() => {
+                    handleWikipediaPageLoad(wikipediaPageUrl);
+                  }}
+                />
+              </span>
+            </Fragment>
+          ) : (
+            <span className="text-xs">No Wikipedia Page Available</span>
+          )}
+        </div>
+      </div>
+      <svg ref={svgRef}></svg>
     </Fragment>
   );
 }
