@@ -1,7 +1,6 @@
 {
   "name": "infoverse.ai",
   "version": "2.1.0",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build && NODE_ENV=production",
@@ -18,9 +17,12 @@
     "eslint-config-next": "13.4.13",
     "lucide-react": "^0.265.0",
     "next": "^13.4.13",
+    "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
+    "react-lifecycles-compat": "^3.0.4",
+    "react-style-proptype": "^3.2.2",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.6",
     "uuid": "^9.0.0"
