@@ -1,139 +1,98 @@
 "use client";
 
-import { Fragment, useState, useEffect, useRef, use } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
-import Split from "@/components/Split";
+import SplitPane from "@/components/SplitPane";
+import { IoClose } from "react-icons/io5";
 
 import { Progress } from "@/components/ui/progress";
+import SPARQLQueryDispatcher from "@/lib/SPARQLQueryDispatcher";
+import { endpointUrl, sparqlQuery } from "@/data/sparqlQueryParams";
 import Graph from "@/components/Graph";
+import { parseWikidata } from "@/lib/utils";
 
 function HomePage() {
   const [progress, setProgress] = useState(0);
   const [fetchingData, setFetchingData] = useState(false);
   const [pageIsLoading, setPageIsLoading] = useState(true);
-  const [dragging, setDragging] = useState(false);
-  const preSizeRef = useRef(0);
-  const nextSizeRef = useRef(0);
-  const moveRef = useRef(false);
-  const paneNumberRef = useRef(0);
-  const wrapperRef = useRef(null);
+  const [wikipediaPageUrl, setWikipediaPageUrl] = useState(null);
+  const [splitPaneView, setSplitPaneView] = useState(false);
 
-  const [wikipediaUrl, setWikipediaUrl] = useState(
-    "https://en.wikipedia.org/wiki/Computer_science"
-  );
+  const [graphData, setGraphData] = useState(null);
 
-  // useEffect(() => {
-  //   let progress = 0;
-  //   setInterval(() => {
-  //     progress += 20;
-  //     const timer = setTimeout(() => setProgress(progress), 500);
-  //     if (progress === 100) {
-  //       clearTimeout(timer);
-  //       setPageIsLoading(false);
-  //     }
-  //   }, 200);
-  // }, []);
+  const graphContainer = useRef();
 
-  // useEffect(() => {
-  //   async function getGraphData() {
-  //     setFetchingData(true);
-  //     const graphData = await fetch("");
-  //     const graphDataJson = await graphData.json();
-  //     console.log(graphDataJson);
-  //     setFetchingData(false);
-  //   }
-
-  //   getGraphData();
-  // }, []);
-
-  function onMouseDown(paneNumber, event) {
-    if (!event.target || !wrapperRef.current) {
-      return;
+  useEffect(() => {
+    async function getGraphData() {
+      const queryDispatcher = new SPARQLQueryDispatcher(endpointUrl);
+      const response = await queryDispatcher.query(sparqlQuery);
+      const graphData = await parseWikidata(response);
+      setGraphData(graphData);
     }
+    getGraphData();
+  }, []);
 
-    this.paneNumber = paneNumber;
-    preSizeRef.current = wrapperRef.current.children[paneNumber].offsetWidth;
-    nextSizeRef.current =
-      wrapperRef.current.children[paneNumber + 1].offsetWidth;
-
-    moveRef.current = true;
-
-    // get widths and heights
-
-    window.addEventListener("mousemove", onDragging);
-    window.addEventListener("mouseup", onDragEnd);
-
-    setDragging(true);
+  function handleSplitPaneViewClose() {
+    setSplitPaneView(false);
+    // setWikipediaPageUrl(null);
   }
 
-  function onDragging(event) {
-    if (!moveRef.current) {
-      return;
-    }
-
-    if (!dragging) {
-      setDragging(true);
-    }
-
-    // calculate new sizes
-
-    onDragging &&
-      onDragging(
-        preSizeRef.current,
-        nextSizeRef.current,
-        paneNumberRef.current
-      );
-  }
-
-  function onDragEnd() {
-    moveRef.current = false;
-
-    onDragEnd &&
-      onDragEnd(preSizeRef.current, nextSizeRef.current, paneNumberRef.current);
-
-    // clean up
-
-    setDragging(false);
-  }
-
-  function renderBar(onMouseDown, ...args) {
-    return (
-      <div className="drop-shadow-none flex flex-col w-4 h-full cursor-col-resize">
-        <div
-          className="drop-shadow-none w-1 h-full bg-gray-400 rounded-md"
-          onMouseDown={onMouseDown}
-        ></div>
-      </div>
-    );
+  function handleWikipediaPageLoad(url) {
+    setWikipediaPageUrl(url);
+    setSplitPaneView(true);
   }
 
   return (
     <Fragment>
-      <Split
-        renderBar={renderBar}
-        onMouseDown={onMouseDown}
-        onDragging={onDragging}
-        onDragEnd={onDragEnd}
-        className="flex flex-row flex-1 h-full border-2 rounded-md"
-      >
-        <div className="flex flex-row h-fit">
-          <div className="flex flex-1 border-2 rounded-md min-w-[100px] justify-center">
-            {/* {pageIsLoading && <Progress value={progress} className="w-1/2" />} */}
-            <Graph data={graphData}/>
+      {graphData !== null && !splitPaneView && (
+        <div
+          className="flex flex-1 h-full w-full pl-2 pr-2"
+          ref={graphContainer}
+        >
+          {graphData !== null && (
+            <Graph
+              data={graphData}
+              handleWikipediaPageLoad={handleWikipediaPageLoad}
+            />
+          )}
+        </div>
+      )}
+      {splitPaneView && (
+        <SplitPane
+          split="vertical"
+          defaultSize="60%"
+          className="flex flex-row flex-1 h-full border-2 rounded-md"
+        >
+          <div
+            className="flex flex-1 h-full w-full pl-2 pr-2"
+            ref={graphContainer}
+          >
+            {graphData !== null && (
+              <Graph
+                data={graphData}
+                graphContainer={graphContainer}
+                handleWikipediaPageLoad={handleWikipediaPageLoad}
+              />
+            )}
           </div>
-          <div className="flex flex-1 border-2 rounded-md min-w-[100px] justify-center">
-            {/* {pageIsLoading && <Progress value={progress} className="w-1/2" />} */}
-            {/* {!pageIsLoading && ( */}
+
+          {/* <div className="flex flex-1 h-full border-2 rounded-md min-w-[100px] justify-center">
+          {/* {pageIsLoading && <Progress value={progress} className="w-1/2" />} */}
+
+          <div className="relative flex flex-1 h-full border-2 rounded-md min-w-[100px] justify-center">
+            <IoClose
+              className="absolute top-2 right-2 text-2xl cursor-pointer"
+              onClick={handleSplitPaneViewClose}
+            />
             <iframe
-              src={wikipediaUrl}
+              src={wikipediaPageUrl}
               className="w-full h-full"
               title="Code Preview"
               sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts"
             />
-            {/* )} */}
           </div>
-        </div>
-      </Split>
+        </SplitPane>
+      )}
     </Fragment>
   );
 }
