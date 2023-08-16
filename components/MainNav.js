@@ -16,6 +16,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
+import QueryForm from "./QueryForm";
+
 const navComponents = [
   {
     title: "D3.js",
@@ -37,84 +39,84 @@ export default function MainNav() {
   };
 
   return (
-    <Fragment>
-      <div className="flex flex-row p-2 justify-between items-center">
-        <div className="flex flex-row items-center">
-          <h1 className="text-3xl text-white font-bold hover:text-indigo-200 cursor-pointer tracking-tight lg:text-4xl">
-            <Link href="/" className="flex flex-initial items-start p-3">
-              Infoverse AI
+    <div className="z-20 flex flex-row justify-between items-center gap-3 p-2">
+      <Link
+        href="/"
+        className="flex flex-initial items-start p-3 hover:cursor-pointer hover:text-indigo-200 text-3xl text-white font-bold hover:text-indigo-200 r tracking-tight lg:text-4xl z-20"
+      >
+        Infoverse AI
+      </Link>
+      <div className="flex flex-1 justify-center">
+        <QueryForm />
+      </div>
+      <NavigationMenu className="hidden z-20 sm:inline-block sm:mx-auto sm:my-2">
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <Link href="/" legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                Home
+              </NavigationMenuLink>
             </Link>
-          </h1>
-        </div>
-        <NavigationMenu className="hidden sm:inline-block sm:mx-auto sm:my-2 sm:p-2">
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <Link href="/" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Home
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/about-me-with-d3" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  About
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/contact" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Contact
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Link href="/about" legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                About
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Link href="/contact" legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                Contact
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
 
-        {/* Mobile Menu */}
-        {!isMenuOpen && (
-          <RiMenu3Line
-            className="relative text-white text-3xl cursor-pointer hover:fill-indigo-200 sm:hidden"
-            onClick={showModalMenu}
-          />
-        )}
-        {isMenuOpen && (
+      {/* Mobile Menu */}
+      {!isMenuOpen && (
+        <RiMenu3Line
+          className="z-20 relative text-white text-3xl cursor-pointer hover:fill-indigo-200 sm:hidden"
+          onClick={showModalMenu}
+        />
+      )}
+      {isMenuOpen && (
+        <div
+          ref={modalRef}
+          className="z-20 absolute top-0 right-0 flex flex-col w-full h-full p-2 bg-gradient-to-r from-indigo-950 to-indigo-500 sm:hidden"
+        >
+          <div className="flex flex-row justify-end">
+            <RiCloseLine
+              className="flex flex-row text-white text-4xl cursor-pointer hover:fill-indigo-200 sm:hidden"
+              onClick={showModalMenu}
+            />
+          </div>
           <div
-            ref={modalRef}
-            className="absolute top-0 right-0 z-50 flex flex-col w-full h-full p-2 bg-gradient-to-r from-indigo-950 to-indigo-500"
+            className="flex flex-row w-full justify-center"
+            onClick={() => setIsMenuOpen(false)}
           >
-            <div className="flex flex-row justify-end">
-              <RiCloseLine
-                className="flex flex-row text-white text-4xl cursor-pointer hover:fill-indigo-200 sm:hidden"
-                onClick={showModalMenu}
-              />
-            </div>
-            <div
-              className="flex flex-row w-full justify-center"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <div className="flex flex-col w-1/2 justify-center items-center gap-4">
-                <Link href="/" legacyBehavior passHref>
-                  <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200 ">
-                    Home
-                  </p>
-                </Link>
-                <Link href="/about-me-with-d3" legacyBehavior passHref>
-                  <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200">
-                    About
-                  </p>
-                </Link>
-                <Link href="/contact" legacyBehavior passHref className="">
-                  <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200">
-                    Contact
-                  </p>
-                </Link>
-              </div>
+            <div className="flex flex-col w-1/2 justify-center items-center gap-4">
+              <Link href="/" legacyBehavior passHref>
+                <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200 ">
+                  Home
+                </p>
+              </Link>
+              <Link href="/about-me-with-d3" legacyBehavior passHref>
+                <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200">
+                  About
+                </p>
+              </Link>
+              <Link href="/contact" legacyBehavior passHref className="">
+                <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200">
+                  Contact
+                </p>
+              </Link>
             </div>
           </div>
-        )}
-      </div>
-    </Fragment>
+        </div>
+      )}
+    </div>
   );
 }
