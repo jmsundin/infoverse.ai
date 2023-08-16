@@ -33,7 +33,7 @@ const sparqlQuery = `PREFIX wd: <http://www.wikidata.org/entity/>
       SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
     }
     ORDER BY ?subject
-    LIMIT 50`;
+    LIMIT 20`;
 
 
 export { endpointUrl, sparqlQuery };
