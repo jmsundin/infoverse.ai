@@ -1,7 +1,8 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, Fragment } from "react";
 import { GraphDataContext } from "@/context/graph-data-context";
 
-import { hierarchy } from "d3-hierarchy";
+import { PiGraphDuotone } from "react-icons/pi";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 
 const QueryForm = () => {
   const {
@@ -9,13 +10,34 @@ const QueryForm = () => {
     nodes: nodes,
     fetchGraphData: fetchGraphData,
   } = useContext(GraphDataContext);
+
+  let i = 0;
+  let initialSearchOptions = null;
+  if (i === 0) {
+    initialSearchOptions = nodes.map((node) => {
+      const item = node.data;
+      return {
+        qid: item.qid,
+        value: item.label,
+        aliases: item.aliases,
+        label: item.label,
+        description: item.description,
+        url: item.url,
+        uri: item.uri,
+        pageId: item.pageId,
+        respository: item.respository,
+      };
+    });
+    i++;
+  }
+  const [searchOptions, setSearchOptions] = useState(initialSearchOptions);
+  const [searchOptionItems, setSearchOptionItems] =
+    useState(initialSearchOptions);
+  const [prevSearchOptions, setPrevSearchOptions] =
+    useState(initialSearchOptions);
+
   const [searchBoxIsFocused, setSearchBoxIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState("");
-
-  console.log(nodes);
-  const [searchOptions, setSearchOptions] = useState(nodes);
-  const [searchOptionItems, setSearchOptionItems] = useState(nodes);
-  const [prevSearchOptions, setPrevSearchOptions] = useState(nodes);
 
   const searchBoxDropdownRef = useRef(null);
 
@@ -89,19 +111,54 @@ const QueryForm = () => {
 
   function handleDropdownClick(event) {
     event.preventDefault();
+    console.log("dropdown click");
 
     const li = event.target.closest("li");
-    const { qid, value, aliases, label, description, uri, url, pageid } =
-      li.dataset;
+    const { qid, value } = li.dataset;
+
     setTopicQID(qid);
     setInputValue(value);
     setSearchBoxIsFocused(false);
     fetchGraphData(qid);
   }
 
+  function handleCreateNewGraphClick(event) {
+    event.preventDefault();
+    event.stopPropagation(); 
+
+    console.log("create new graph");
+    const li = event.target.closest("li");
+    const { qid, value } = li.dataset;
+
+    setTopicQID(qid);
+    setInputValue(value);
+    setSearchBoxIsFocused(false);
+
+    const createNewGraph = true;
+    const addNodeToGraph = false;
+    fetchGraphData(qid, createNewGraph, addNodeToGraph);
+  }
+
+  function handleAddToGraphClick(event) {
+    event.preventDefault();
+    event.stopPropagation(); 
+
+    // console.log("add to graph");
+    const li = event.target.closest("li");
+    const { qid, value } = li.dataset;
+
+    setTopicQID(qid);
+    setInputValue(value);
+    setSearchBoxIsFocused(false);
+
+    const addNodeToGraph = true;
+    const createNewGraph = false;
+    fetchGraphData(qid, createNewGraph, addNodeToGraph);
+  }
+
   return (
-    <div className="flex w-full justify-center z-20">
-      <form className="relative w-full justify-center z-20">
+    <div className="flex w-full justify-center z-20 bg-inherit">
+      <form className="relative w-full justify-center z-20 bg-inherit">
         <input
           type="text"
           placeholder="Search..."
@@ -109,43 +166,76 @@ const QueryForm = () => {
           onChange={handleSearchInput}
           onFocus={() => setSearchBoxIsFocused(true)}
           onBlur={() => setSearchBoxIsFocused(false)}
-          className="w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300"
+          className="z-20 w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300"
         />
         <div
           ref={searchBoxDropdownRef}
           className={
             searchBoxIsFocused
-              ? "absolute top-12 overflow-y-auto h-96 rounded-md border border-indigo-300"
+              ? "z-20 w-full absolute top-12 overflow-y-auto h-96 rounded-md border border-indigo-300"
               : "hidden"
           }
         >
-          <ul className="divide-indigo-300 divide-y">
-            {nodes !== undefined && searchBoxIsFocused
-              ? nodes.map((node, index) => {
-                  const item = node.data;
-                  return (
-                    <li
-                      key={index}
-                      className="px-4 py-2 bg-indigo-500 cursor-pointer hover:bg-indigo-600"
-                      data-qid={item.qid}
-                      data-value={item.value}
-                      data-aliases={item.aliases}
-                      data-label={item.label}
-                      data-description={item.description}
-                      data-uri={item.uri}
-                      data-url={item.url}
-                      data-pageid={item.pageId}
-                      onMouseDown={handleDropdownClick}
-                    >
-                      <span className="font-bold text-gray-200">
-                        {item.value}
-                      </span>
-                      <p className="text-gray-200">{item.description}</p>
-                    </li>
-                  );
-                })
-              : null}
-          </ul>
+          {searchOptionItems !== undefined && searchBoxIsFocused && (
+            <ul
+              className={
+                searchOptionItems !== undefined
+                  ? "z-20 w-full divide-indigo-300 divide-y divide-solid"
+                  : "hidden"
+              }
+            >
+              {searchOptionItems.map((item, index) => {
+                return (
+                  <li
+                    key={index}
+                    className="flex flex-row px-4 py-2 justify-between cursor-pointer bg-indigo-500 hover:bg-indigo-600"
+                    data-qid={item.qid}
+                    data-value={item.value}
+                    data-aliases={item.aliases}
+                    data-label={item.label}
+                    data-description={item.description}
+                    data-uri={item.uri}
+                    data-url={item.url}
+                    data-pageid={item.pageId}
+                    onMouseDown={handleDropdownClick}
+                  >
+                    <div className="flex flex-col text-gray-200">
+                      <span className="font-bold">{item.label}</span>
+                      <p className="flex flex-row">{item.description}</p>
+                    </div>
+                    <div className="flex flex-col justify-center gap-2 bg-inherit">
+                      <div
+                        className="flex flex-row gap-2 justify-center text-base text-gray-300 fill-gray-300 hover:text-white hover:fill-white cursor-pointer"
+                        onMouseDown={handleAddToGraphClick}
+                      >
+                        <span className="flex">Add</span>
+                        <AiOutlinePlusCircle
+                          id="add-to-graph"
+                          key={"add-to-graph"}
+                          value="add-to-graph"
+                          title="Add to current graph"
+                          className="w-6 h-6"
+                        />
+                      </div>
+                      <div
+                        className="flex flex-row gap-2 text-center justify-center text-base text-gray-300 fill-gray-300 hover:text-white hover:fill-white cursor-pointer"
+                        onMouseDown={handleCreateNewGraphClick}
+                      >
+                        New
+                        <PiGraphDuotone
+                          id="create-new-graph"
+                          key={"create-new-graph"}
+                          value="create-new-graph"
+                          title="Create new graph"
+                          className="w-6 h-6"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </form>
     </div>
