@@ -6,6 +6,8 @@ import { GraphDataContext } from "@/context/graph-data-context";
 import * as d3 from "d3";
 
 import { BsWikipedia } from "react-icons/bs";
+import { PiGraphDuotone } from "react-icons/pi";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 
 function Graph({ graphContainer, handleWikipediaPageLoad }) {
   const {
@@ -24,6 +26,10 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
   const svgRef = useRef(null);
   const width = useRef(960);
   const height = useRef(700);
+
+  const rootRef = useRef(root);
+  const nodesRef = useRef(nodes);
+  const linksRef = useRef(links);
 
   const simulationRef = useRef();
   const nodeGroupRef = useRef();
@@ -105,7 +111,7 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
           .classed("rounded-lg", true)
           .classed("p-2", true)
           .classed("bg-indigo-100", true)
-          .classed("z-10", true)
+          .classed("z-5", true)
           .classed("invisible", false)
           .classed("visible", true)
           .classed("max-w-[300px]", true);
@@ -167,7 +173,7 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
           .classed("rounded-lg", true)
           .classed("p-2", true)
           .classed("bg-indigo-100", true)
-          .classed("z-10", true)
+          .classed("z-5", true)
           .classed("invisible", false)
           .classed("visible", true)
           .classed("max-w-[300px]", true);
@@ -291,6 +297,8 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
         console.log(error);
       }
     }
+    
+    simulationRef.current = simulation;
 
     return () => {
       simulation.stop();
@@ -354,10 +362,11 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
             <Fragment>
               <span
                 ref={tooltipWikipediaIconRef}
-                className="flex gap-2 justif-center cursor-pointer hover:border-indigo-500 hover:text-indigo-500"
+                className="flex gap-2 justify-center cursor-pointer"
               >
                 <BsWikipedia
-                  className="w-6 h-6 border-solid border-2 border-gray-500 rounded-lg hover:text-indigo-500 hover:border-indigo-500"
+                  className="w-6 h-6 hover:fill-indigo-500 hover:border-indigo-500"
+                  title="Wikipedia Page"
                   onClick={() => {
                     handleWikipediaPageLoad(wikipediaPageUrl);
                   }}
@@ -365,11 +374,30 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
               </span>
             </Fragment>
           ) : (
-            <span className="text-xs">No Wikipedia Page Available</span>
+            <span className="text-xs">No Wiki Page</span>
           )}
-          <span className="text-xs" ref={subtopicsRef}>
-            View Subtopics
-          </span>
+          <div className="flex flex-row justify-center gap-3 bg-inherit">
+            <PiGraphDuotone
+              id="create-new-graph"
+              key={"create-new-graph"}
+              value="create-new-graph"
+              title="Create new graph"
+              className="float-right w-6 h-6 fill-black cursor-pointer hover:fill-indigo-500"
+              onMouseDown={function (event) {
+                console.log(this);
+              }}
+            />
+            <AiOutlinePlusCircle
+              id="add-to-graph"
+              key={"add-to-graph"}
+              value="add-to-graph"
+              title="Add to current graph"
+              className="float-right w-6 h-6 fill-black cursor-pointer hover:fill-indigo-500"
+              onMouseDown={function (event) {
+                console.log(this);
+              }}
+            />
+          </div>
         </div>
       </div>
       <svg
@@ -378,37 +406,37 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
         className="bg-gradrient-to-r from-indigo-300 to-indigo-100 rounded-lg w-full h-full mx-auto"
       >
         <g id="linkGroup" ref={linkGroupRef}>
-          {links.map((link) => {
-            return (
-              <line
-                key={`link__${link.source.data.qid}--${link.target.data.qid}`}
-                id={`link__${link.source.data.qid}--${link.target.data.qid}`}
-                stroke="#fff"
-                strokeWidth="1"
-                className="link"
-              ></line>
-            );
-          })}
+          {links.length > 0 && links.map((link) => {
+              return (
+                <line
+                  key={`link__${link.source.data.qid}--${link.target.data.qid}`}
+                  id={`link__${link.source.data.qid}--${link.target.data.qid}`}
+                  stroke="#fff"
+                  strokeWidth="1"
+                  className="link"
+                ></line>
+              );
+            })}
         </g>
 
         <g id="nodeGroup" ref={nodeGroupRef}>
-          {nodes?.map((node) => {
-            return (
-              <Fragment key={"nodeFragment__" + node.data.qid}>
-                <Node key={"node__" + node.data.qid} data={node.data} />
-                <text
-                  key={"nodeText__" + node.data.qid}
-                  id={"nodeText__" + node.data.qid}
-                  className="text-lg fill-black label relative text-center"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  cursor="default"
-                >
-                  {node.data.label}
-                </text>
-              </Fragment>
-            );
-          })}
+          {nodes.length > 0 && nodes.map((node) => {
+              return (
+                <Fragment key={"nodeFragment__" + node.data.qid}>
+                  <Node key={"node__" + node.data.qid} data={node.data} />
+                  <text
+                    key={"nodeText__" + node.data.qid}
+                    id={"nodeText__" + node.data.qid}
+                    className="text-lg fill-black label relative text-center"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    cursor="default"
+                  >
+                    {node.data.label}
+                  </text>
+                </Fragment>
+              );
+            })}
         </g>
       </svg>
     </Fragment>
