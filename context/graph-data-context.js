@@ -21,87 +21,160 @@ function GraphDataProvider({ children }) {
   // }
 
   const initialGraphData = {
-    label: "Human",
-    qid: "Q5",
-    description: "human being, person",
+    qid: "Q35120",
+    label: "entity",
+    value: "entity",
+    description: "anything that can be considered, discussed, or observed",
+    aliases: ["thing", "entity", "entities"],
+    uri: "http://www.wikidata.org/entity/Q35120",
+    url: "http://www.wikidata.org/wiki/Q35120",
+    repository: "wikidata",
     children: [
       {
-        label: "Animal",
-        qid: "Q729",
-        description: "multicellular organism that is eukaryotic",
-        children: [
-          {
-            label: "Bird",
-            qid: "Q5113",
-            description: "class of vertebrates",
-            children: [],
-          },
-          {
-            label: "Fish",
-            qid: "Q133836",
-            description: "vertebrate that lives in water",
-            children: [],
-          },
-          {
-            label: "Insect",
-            qid: "Q12078",
-            description: "class of invertebrates",
-            children: [],
-          },
-        ],
-      },
-      {
-        label: "Person",
         qid: "Q215627",
+        label: "Person",
+        value: "Person",
         description: "human being",
+        aliases: [
+          "person",
+          "people",
+          "human",
+          "humans",
+          "human being",
+          "human beings",
+        ],
+        uri: "http://www.wikidata.org/entity/Q215627",
+        url: "http://www.wikidata.org/wiki/Q215627",
+        repository: "wikidata",
         children: [
           {
-            label: "Politician",
             qid: "Q82955",
+            label: "Politician",
+            value: "Politician",
             description: "person who is involved in politics for a profession",
+            aliases: ["politician", "politicians"],
+            uri: "http://www.wikidata.org/entity/Q82955",
+            url: "http://www.wikidata.org/wiki/Q82955",
+            repository: "wikidata",
             children: [],
           },
           {
-            label: "Scientist",
             qid: "Q901",
+            label: "Scientist",
+            value: "Scientist",
             description: "person who engages in science",
+            aliases: ["scientist", "scientists"],
+            uri: "http://www.wikidata.org/entity/Q901",
+            url: "http://www.wikidata.org/wiki/Q901",
+            repository: "wikidata",
             children: [],
           },
           {
-            label: "Writer",
             qid: "Q36180",
+            label: "Writer",
+            value: "Writer",
             description: "person who uses written words to communicate ideas",
+            aliases: ["writer", "writers"],
+            uri: "http://www.wikidata.org/entity/Q36180",
+            url: "http://www.wikidata.org/wiki/Q36180",
+            repository: "wikidata",
             children: [],
           },
         ],
       },
       {
-        label: "Organism",
-        qid: "Q7239",
-        description: "any contiguous living system",
+        qid: "Q729",
+        label: "Animal",
+        value: "Animal",
+        description: "multicellular organism that is eukaryotic",
+        aliases: ["animals", "animal", "beast", "beasts"],
+        uri: "http://www.wikidata.org/entity/Q729",
+        url: "http://www.wikidata.org/wiki/Q729",
+        repository: "wikidata",
         children: [
           {
-            label: "Plant",
+            qid: "Q5113",
+            label: "Bird",
+            value: "Bird",
+            description: "class of vertebrates",
+            aliases: ["birds", "bird"],
+            uri: "http://www.wikidata.org/entity/Q5113",
+            url: "http://www.wikidata.org/wiki/Q5113",
+            repository: "wikidata",
+            children: [],
+          },
+          {
+            qid: "Q133836",
+            label: "Fish",
+            value: "Fish",
+            description: "vertebrate that lives in water",
+            aliases: ["fish", "fishes"],
+            uri: "http://www.wikidata.org/entity/Q133836",
+            url: "http://www.wikidata.org/wiki/Q133836",
+            repository: "wikidata",
+            children: [],
+          },
+          {
+            qid: "Q12078",
+            label: "Insect",
+            value: "Insect",
+            description: "class of invertebrates",
+            aliases: ["insect", "insects"],
+            uri: "http://www.wikidata.org/entity/Q12078",
+            url: "http://www.wikidata.org/wiki/Q12078",
+            repository: "wikidata",
+            children: [],
+          },
+        ],
+      },
+      {
+        qid: "Q7239",
+        label: "Organism",
+        value: "Organism",
+        description: "any contiguous living system",
+        aliases: ["organism", "organisms"],
+        uri: "http://www.wikidata.org/entity/Q7239",
+        url: "http://www.wikidata.org/wiki/Q7239",
+        repository: "wikidata",
+        children: [
+          {
             qid: "Q756",
+            label: "Plant",
+            value: "Plant",
             description: "living organism of the kingdom Plantae",
+            aliases: ["plant", "plants"],
+            uri: "http://www.wikidata.org/entity/Q756",
+            url: "http://www.wikidata.org/wiki/Q756",
+            repository: "wikidata",
             children: [],
           },
           {
-            label: "Fungus",
             qid: "Q8447",
+            label: "Fungus",
+            value: "Fungus",
             description: "organism that is classified in the kingdom Fungi",
+            aliases: ["fungus", "fungi"],
+            uri: "http://www.wikidata.org/entity/Q8447",
+            url: "http://www.wikidata.org/wiki/Q8447",
+            repository: "wikidata",
             children: [],
           },
           {
-            label: "Bacteria",
             qid: "Q10876",
+            label: "Bacteria",
+            value: "Bacteria",
             description: "type of biological cell",
+            aliases: ["bacteria", "bacterium"],
+            uri: "http://www.wikidata.org/entity/Q10876",
+            url: "http://www.wikidata.org/wiki/Q10876",
+            repository: "wikidata",
             children: [],
           },
         ],
       },
     ],
   };
+
   const initialRoot = hierarchy(initialGraphData);
   const initialNodes = initialRoot.descendants();
   const initialLinks = initialRoot.links();
@@ -113,7 +186,7 @@ function GraphDataProvider({ children }) {
   const [prevNodes, setPrevNodes] = useState(initialNodes);
   const [prevLinks, setPrevLinks] = useState(initialLinks);
 
-  const [topicQID, setTopicQID] = useState("Q5");
+  const [topicQID, setTopicQID] = useState("Q35120");
 
   if (prevRoot !== root) {
     setPrevRoot(root);
@@ -127,94 +200,74 @@ function GraphDataProvider({ children }) {
     setPrevLinks(links);
   }
 
-  let i = 0;
-  // let randomTopicQID = "Q" + Math.floor(Math.random() * 100);
-  // console.log(randomTopicQID);
-
-  // if (i === 0) {
-  //   fetchGraphData("Q215627");
-  //   i++;
-  // }
-
-  // function getSuggestedTopicsGraphData() {
-  //   const suggestedItemsGraphData = createGraphWithSuggestedTopics();
-  //   if (suggestedItemsGraphData?.children.length > 0) {
-  //     const root = hierarchy(suggestedItemsGraphData);
-  //     setSuggestedTopicsGraphData(root);
-  //     return root;
-  //   }
-
-  //   const root = hierarchy({
-  //     name: "No suggested topics",
-  //     children: [],
-  //   });
-  //   return root;
-  // }
-
-  async function fetchGraphData(topicQID) {
+  async function fetchGraphData(
+    topicQID,
+    createNewGraph = true,
+    addAsSubgraph = false
+  ) {
     const queryDispatcher = new SPARQLQueryDispatcher(endpointUrl);
-    // console.log(topicQID);
     const query = sparqlQuery.replaceAll("Q21198", topicQID);
     const jsonResponse = await queryDispatcher.query(query);
-    console.log(jsonResponse);
     const graphData = await parseWikidata(jsonResponse);
-    console.log(graphData);
+    if (graphData === null || graphData === undefined) return;
+
     const newRoot = hierarchy(graphData);
-    console.log("root:", newRoot);
+    const newNodes = newRoot.descendants();
+    const newLinks = newRoot.links();
 
-    // console.log("new root:", newRoot);
-    setRoot(newRoot);
-    setNodes(newRoot.descendants());
-    setLinks(newRoot.links());
+    if (createNewGraph) {
+      setRoot(newRoot);
+      setNodes(newNodes);
+      setLinks(newLinks);
+    } else if (addAsSubgraph) {
+      addSubgraph(newRoot, newNodes, newLinks);
+    }
+  }
 
-    if (typeof nodes === "object") return;
+  function addSubgraph(newRoot, newNodes, newLinks) {
+    console.log("newRoot:", newRoot);
+    console.log("newNodes:", newNodes);
+    console.log("newLinks:", newLinks);
+
+    const prevRoot = root;
     const prevNodes = nodes;
-    // console.log("new nodes:", newNodes);
-    // console.log("prev nodes:", prevNodes);
+    console.log("prevNodes:", prevNodes);
+
     const prevNodeQIDs = prevNodes.map((node) => node.data.qid);
-    const uniqueNodes = newNodes.filter(
+    const uniqueNewNodes = newNodes.filter(
       (node) => !prevNodeQIDs.includes(node.data.qid)
     );
 
-    // find parent of unique node in prevGraphData
-    uniqueNodes.forEach((node) => {
-      if (node.depth !== 0) {
-        node.children = [];
-        return node;
-      }
-      return node;
-    });
+    console.log("number of new nodes:", newNodes.length);
+    console.log("unique new nodes:", uniqueNewNodes);
 
-    const updatedGraphData = uniqueNodes.map((node) => {
-      const parent = prevNodes.find((prevNode) => {
-        if (prevNode.data.qid === node.parent.data.qid) {
-          if (prevNode.depth !== 0) prevNode.children = [];
-          prevNode.children.push(node);
-          prevNode.data.children.push(node);
-          return prevNode;
-        }
-      });
-      if (parent === null) return node;
-      return parent;
-    });
+    const updatedPrevNodesWithChildren =
+      prevNodes.length === 0
+        ? uniqueNewNodes
+        : prevNodes.map((node) => {
+            uniqueNewNodes.forEach((uniqueNewNode) => {
+              if (uniqueNewNode.depth !== 0) {
+                if (uniqueNewNode.parent.data.qid === node.data.qid) {
+                  if (node.children === undefined) node.children = [];
+                  node.children.push(uniqueNewNode);
+                  node.data.children.push(uniqueNewNode);
+                  return node;
+                }
+              }
+            });
+            return node;
+          });
 
-    console.log("updated graph data:", updatedGraphData);
-    setRoot(updatedGraphData);
-    setNodes([...prevNodes, ...uniqueNodes]);
-    const newLinks = newRoot.links();
-    setLinks([...prevLinks, ...newLinks]);
+    console.log("updated prev nodes with children:", updatedPrevNodesWithChildren);
+    const updatedGraphData = updatedPrevNodesWithChildren;
 
-    if (root !== prevRoot) {
-      setPrevRoot(root);
-    }
-
-    if (nodes !== prevNodes) {
-      setPrevNodes(nodes);
-    }
-
-    if (links !== prevLinks) {
-      setPrevLinks(links);
-    }
+    const updatedRoot = hierarchy(updatedGraphData);
+    console.log("updated root:", updatedRoot)
+    const updatedNodes = updatedRoot.descendants();
+    const updatedLinks = updatedRoot.links();
+    setRoot(updatedRoot);
+    setNodes(updatedNodes);
+    setLinks(updatedLinks);
   }
 
   const graphContext = {
