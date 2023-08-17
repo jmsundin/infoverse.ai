@@ -11,9 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import Graph from "@/components/Graph";
 
 function HomePage() {
-  const { nodeQID, setNodeQID, graphData, setGraphData } = useContext(GraphDataContext);
+  // const { nodeQID, setNodeQID, graphData, setGraphData } = useContext(GraphDataContext);
   const [progress, setProgress] = useState(0);
-  const [fetchingData, setFetchingData] = useState(false);
   const [pageIsLoading, setPageIsLoading] = useState(true);
   const [wikipediaPageUrl, setWikipediaPageUrl] = useState(null);
   const [splitPaneView, setSplitPaneView] = useState(false);
@@ -44,7 +43,7 @@ function HomePage() {
         <SplitPane
           split="vertical"
           defaultSize="60%"
-          className="flex flex-row flex-1 h-full border-2 rounded-md"
+          className="flex flex-row flex-1 h-full w-full"
         >
           <div
             className="flex flex-1 h-full w-full pl-2 pr-2"
