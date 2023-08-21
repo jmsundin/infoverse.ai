@@ -4,7 +4,7 @@ export default function Document({ children }) {
   return (
     <Html lang="en">
       <Head />
-      <body className="z-20 box-border flex flex-col bg-gradient-to-r from-indigo-950 to-indigo-500">
+      <body className="w-screen h-screen border-box">
         <Main />
         <NextScript />
       </body>
