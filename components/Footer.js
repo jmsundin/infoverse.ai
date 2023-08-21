@@ -6,8 +6,11 @@ import { BsGithub } from "react-icons/bs";
 
 function Footer() {
   return (
-    <footer className="absolute left-0 right-0">
-      <div className="flex flex-row justify-center text-white p-4">
+    <footer
+      id="footer"
+      className="z-20 h-14 absolute bottom-0 left-0 right-0 bg-gradient-to-r from-indigo-950 to-indigo-500"
+    >
+      <div className="flex flex-row justify-center text-white">
         <div className="bg-gradient-to-r from-gray-500 to-white h-0.5 w-5/6 mx-auto">
           {/* Social Media Links */}
           <div className="flex flex-row justify-between p-3 gap-3 text-white text-base sm:text-2xl">
@@ -41,8 +44,7 @@ function Footer() {
               </Link>{" "}
             </div>
             <div className="text-gray-200 text-base font-bold flex justify-center items-center gap-2">
-              <RiCopyrightLine className="inline-block" />
-              {" "}
+              <RiCopyrightLine className="inline-block" />{" "}
               <span>Infoverse AI 2023</span>
             </div>
           </div>
