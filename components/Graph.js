@@ -9,7 +9,7 @@ import { BsWikipedia } from "react-icons/bs";
 import { PiGraphDuotone } from "react-icons/pi";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
-function Graph({ graphContainer, handleWikipediaPageLoad }) {
+function Graph({ handleWikipediaPageLoad }) {
   const {
     root: root,
     nodes: nodes,
@@ -24,12 +24,6 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
   const tooltipWikipediaIconRef = useRef();
   const subtopicsRef = useRef();
   const svgRef = useRef(null);
-  const width = useRef(960);
-  const height = useRef(700);
-
-  const rootRef = useRef(root);
-  const nodesRef = useRef(nodes);
-  const linksRef = useRef(links);
 
   const simulationRef = useRef();
   const nodeGroupRef = useRef();
@@ -38,7 +32,13 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
   const [focusedNodeQID, setFocusedNodeQID] = useState("");
   const [wikipediaPageUrl, setWikipediaPageUrl] = useState("");
 
+  const width = useRef(0);
+  const height = useRef(0);
+
   useEffect(() => {
+    width.current = d3.select("#graphContainer").node().clientWidth;
+    height.current = d3.select("#graphContainer").node().clientHeight;
+
     const nodePaddingX = 60;
     const nodePaddingY = 20;
 
@@ -55,19 +55,27 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
       .force("collide", d3.forceCollide().radius(100))
       .force("charge", d3.forceManyBody().strength(-100))
       .force("center", d3.forceCenter(width.current / 2, height.current / 2));
-    // Create the container SVG.
+
     const svgSelection = d3.select(svgRef.current);
 
     const linkSelection = d3.selectAll("line").data(links);
 
     const nodeSelection = d3
       .select(nodeGroupRef.current)
+      .selectAll("g")
+      .data(nodes);
+
+    const rectSelection = d3
+      .select(nodeGroupRef.current)
       .selectAll("rect")
       .data(nodes);
 
-    const nodeTextSelection = d3.selectAll("text").data(nodes);
+    const nodeTextSelection = d3
+      .select(nodeGroupRef.current)
+      .selectAll("text")
+      .data(nodes);
 
-    nodeSelection
+    rectSelection
       .attr("width", (d) => {
         const textWidth = d3
           .select(`#nodeText__${d.data.qid}`)
@@ -89,59 +97,63 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
           .select(`#node__${d.data.qid}`)
           .node()
           .getBBox().width;
-        return nodeWidth / 2 + "px";
+        return nodeWidth / 4;
       })
       .attr("dy", (d) => {
         const nodeHeight = d3
           .select(`#node__${d.data.qid}`)
           .node()
           .getBBox().height;
-        return nodeHeight / 2 + "px";
+        return nodeHeight / 4;
       });
 
     nodeSelection
-      .on("mouseover", (e, d) => {
-        setFocusedNodeQID(d.data.qid);
-        // console.log(d.data);
-        const tooltip = d3.select(tooltipRef.current);
-        tooltip
-          .style("opacity", 1)
-          .style("left", e.pageX + 100 + "px")
-          .style("top", e.pageY + "px")
-          .classed("rounded-lg", true)
-          .classed("p-2", true)
-          .classed("bg-indigo-100", true)
-          .classed("z-5", true)
-          .classed("invisible", false)
-          .classed("visible", true)
-          .classed("max-w-[300px]", true);
-
-        d3.select(tooltipTitleRef.current)
-          .classed("text-lg", true)
-          .classed("font-bold", true)
-          .html(d.data.label);
-        d3.select(tooltipDescriptionRef.current)
-          .classed("text-base", true)
-          .classed("font-normal", true)
-          .classed("mt-2", true)
-          .html(`<strong>Description:</strong> ${d.data.description}`);
-        d3.select(tooltipMenuRef.current)
-          .classed("flex", true)
-          .classed("flex-row", true)
-          .classed("justify-center", true)
-          .classed("space-x-2", true)
-          .classed("items-center", true)
-          .classed("mt-2", true)
-          .classed("text-base", true);
-        d3.select(subtopicsRef.current)
-          .classed("text-base", true)
-          .classed("cursor-pointer", true)
-          .classed("hover:text-indigo-500", true)
-          .on("click", () => {
-            fetchGraphData(d.data.qid);
-          });
-      })
+      .on("mouseover", handleNodeClick)
+      .on("touchstart", handleNodeClick)
       .call(drag(simulation));
+
+    function handleNodeClick(e, d) {
+      e.stopPropagation();
+      d3.select(`#nodeText__${d.data.qid}`).dispatch("mouseover");
+      setFocusedNodeQID(d.data.qid);
+      const tooltip = d3.select(tooltipRef.current);
+      tooltip
+        .style("opacity", 1)
+        .style("left", e.x + "px")
+        .style("top", e.y + "px")
+        .classed("invisible", false)
+        .classed("visible", true);
+
+      d3.select(tooltipTitleRef.current)
+        .classed("text-lg", true)
+        .classed("font-bold", true)
+        .html(d.data.label);
+      d3
+        .select(tooltipDescriptionRef.current)
+        .classed("text-base", true)
+        .classed("font-normal", true)
+        .classed("mt-2", true).html(`<strong>Description:</strong> ${
+        d.data.description
+      } <br />
+        <i class="text-sm">Source: <a href="${d.data.url}" target="_blank">${
+        d.data.repository[0].toUpperCase() + d.data.repository.substring(1)
+      }</a></i>`);
+      d3.select(tooltipMenuRef.current)
+        .classed("flex", true)
+        .classed("flex-row", true)
+        .classed("justify-center", true)
+        .classed("space-x-2", true)
+        .classed("items-center", true)
+        .classed("mt-2", true)
+        .classed("text-base", true);
+      d3.select(subtopicsRef.current)
+        .classed("text-base", true)
+        .classed("cursor-pointer", true)
+        .classed("hover:text-indigo-500", true)
+        .on("click.handleFetch", () => {
+          fetchGraphData(d.data.qid);
+        });
+    }
 
     // Setting the x and y of the text to the center of the node.
     nodeTextSelection
@@ -162,73 +174,40 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
           .node()
           .getBBox().height;
         return nodeHeight / 2 + nodeTextHeight / 4 + "px";
-      })
-      .on("mouseover", (e, d) => {
-        setFocusedNodeQID(d.data.qid);
-        const tooltip = d3.select(tooltipRef.current);
-        tooltip
-          .style("opacity", 1)
-          .style("left", e.pageX + 100 + "px")
-          .style("top", e.pageY + 100 + "px")
-          .classed("rounded-lg", true)
-          .classed("p-2", true)
-          .classed("bg-indigo-100", true)
-          .classed("z-5", true)
-          .classed("invisible", false)
-          .classed("visible", true)
-          .classed("max-w-[300px]", true);
-
-        d3.select(tooltipTitleRef.current)
-          .classed("text-2xl", true)
-          .classed("font-bold", true)
-          .html(d.data.label);
-        d3.select(tooltipDescriptionRef.current)
-          .classed("text-base", true)
-          .classed("font-normal", true)
-          .classed("mt-2", true)
-          .html(`<strong>Description:</strong> ${d.data.description}`);
-        d3.select(tooltipMenuRef.current)
-          .classed("flex", true)
-          .classed("flex-row", true)
-          .classed("justify-center", true)
-          .classed("space-x-2", true)
-          .classed("items-center", true)
-          .classed("mt-2", true)
-          .classed("text-2xl", true);
-        d3.select(subtopicsRef.current)
-          .classed("text-base", true)
-          .classed("cursor-pointer", true)
-          .classed("hover:text-indigo-500", true)
-          .on("click", () => {
-            fetchGraphData(d.data.qid);
-          });
-      })
-      .call(drag(simulation));
+      });
 
     const tooltipSelection = d3.select(tooltipRef.current);
+    const containerSelection = d3.select("#container").call(drag(simulation));
 
-    svgSelection.on("click", (e, d) => {
-      const tooltip = d3.select(tooltipRef.current);
-      tooltip.classed("invisible", true);
-      setFocusedNodeQID("");
-    });
+    svgSelection.on("pointerdown", handleSvgClick);
+
+    function handleSvgClick(e, d) {
+      if (e.target.id.includes("svg")) {
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip.classed("invisible", true);
+        setFocusedNodeQID("");
+      }
+    }
 
     const zoom = d3.zoom().on("zoom", handleZoom);
 
     function drag(simulation) {
       function dragstarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
+        if (d === undefined) return;
+        d.fx = d?.x;
+        d.fy = d?.y;
       }
 
       function dragged(event, d) {
+        if (d === undefined) return;
         d.fx = event.x;
         d.fy = event.y;
       }
 
       function dragended(event, d) {
         if (!event.active) simulation.alphaTarget(0);
+        if (d === undefined) return;
         d.fx = null;
         d.fy = null;
       }
@@ -240,7 +219,7 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
     }
 
     function handleZoom(event) {
-      d3.selectAll("g").attr("transform", event.transform);
+      d3.select("#container").attr("transform", event.transform);
     }
 
     function initZoom() {
@@ -254,6 +233,11 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
     function tick() {
       try {
         nodeSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
+      } catch (error) {
+        console.log(error);
+      }
+      try {
+        rectSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
       } catch (error) {
         console.log(error);
       }
@@ -297,7 +281,7 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
         console.log(error);
       }
     }
-    
+
     simulationRef.current = simulation;
 
     return () => {
@@ -354,7 +338,10 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
 
   return (
     <Fragment>
-      <div ref={tooltipRef} className="invisible absolute">
+      <div
+        ref={tooltipRef}
+        className="invisible absolute rounded-lg p-2 bg-indigo-100 z-5 max-w-[300px]"
+      >
         <div ref={tooltipTitleRef}></div>
         <p ref={tooltipDescriptionRef}></p>
         <div ref={tooltipMenuRef} className="flex flex-row items-start gap-2">
@@ -402,73 +389,76 @@ function Graph({ graphContainer, handleWikipediaPageLoad }) {
       </div>
       <svg
         ref={svgRef}
+        id="svg"
+        width="100%"
+        height="100%"
         viewBox={`0 0 ${width.current} ${height.current}`}
-        className="bg-gradrient-to-r from-indigo-300 to-indigo-100 rounded-lg w-full h-full mx-auto"
+        className="bg-gradrient-to-r from-indigo-300 to-indigo-100 mx-auto"
       >
-        <g id="linkGroup" ref={linkGroupRef}>
-          {links.length > 0 && links.map((link) => {
-              return (
-                <line
-                  key={`link__${link.source.data.qid}--${link.target.data.qid}`}
-                  id={`link__${link.source.data.qid}--${link.target.data.qid}`}
-                  stroke="#fff"
-                  strokeWidth="1"
-                  className="link"
-                ></line>
-              );
-            })}
-        </g>
+        <g id="container">
+          <g id="linkGroup" ref={linkGroupRef}>
+            {links.length > 0 &&
+              links.map((link) => {
+                return (
+                  <line
+                    key={`link__${link.source.data.qid}--${link.target.data.qid}`}
+                    id={`link__${link.source.data.qid}--${link.target.data.qid}`}
+                    stroke="#fff"
+                    strokeWidth="1"
+                    className="link"
+                  ></line>
+                );
+              })}
+          </g>
 
-        <g id="nodeGroup" ref={nodeGroupRef}>
-          {nodes.length > 0 && nodes.map((node) => {
-              return (
-                <Fragment key={"nodeFragment__" + node.data.qid}>
-                  <Node key={"node__" + node.data.qid} data={node.data} />
-                  <text
-                    key={"nodeText__" + node.data.qid}
-                    id={"nodeText__" + node.data.qid}
-                    className="text-lg fill-black label relative text-center"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    cursor="default"
-                  >
-                    {node.data.label}
-                  </text>
-                </Fragment>
-              );
-            })}
+          <g id="nodeGroup" ref={nodeGroupRef}>
+            {nodes.length > 0 &&
+              nodes.map((node) => {
+                return <Node key={"node__" + node.data.qid} data={node.data} />;
+              })}
+          </g>
         </g>
       </svg>
     </Fragment>
   );
 }
 
-function Node({ data, children }) {
+function Node({ data }) {
   const fillColor = "#fff";
   const strokeColor = "#000";
   const rx = "15px";
   const ry = "15px";
 
   return (
-    <rect
-      id={`node__${data.qid}`}
-      data-value={data.value}
-      data-qid={data.qid}
-      data-label={data.label}
-      data-description={data.description}
-      data-parent={data.parent}
-      data-children={data.children}
-      data-uri={data.uri}
-      data-url={data.url}
-      data-repository={data.repository}
-      rx={rx}
-      ry={ry}
-      fill={fillColor}
-      stroke={strokeColor}
-      className="node relative"
-    >
-      {children}
-    </rect>
+    <g key={`node__${data.qid}`} id={`node__${data.qid}`}>
+      <rect
+        key={`nodeRect__${data.qid}`}
+        id={`nodeRect__${data.qid}`}
+        data-value={data.value}
+        data-qid={data.qid}
+        data-label={data.label}
+        data-description={data.description}
+        data-parent={data.parent}
+        data-children={data.children}
+        data-uri={data.uri}
+        data-url={data.url}
+        data-repository={data.repository}
+        rx={rx}
+        ry={ry}
+        fill={fillColor}
+        stroke={strokeColor}
+        className="node relative"
+      />
+      <text
+        key={"nodeText__" + data.qid}
+        id={"nodeText__" + data.qid}
+        className="text-lg fill-black label relative text-center"
+        textAnchor="middle"
+        cursor="default"
+      >
+        {data.label}
+      </text>
+    </g>
   );
 }
 
