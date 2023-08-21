@@ -4,7 +4,12 @@ import { GraphDataContext } from "@/context/graph-data-context";
 import { PiGraphDuotone } from "react-icons/pi";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
+import { useRouter } from "next/router";
+import * as ga from "../lib/ga";
+
 const QueryForm = () => {
+  const router = useRouter();
+
   const {
     setTopicQID: setTopicQID,
     nodes: nodes,
@@ -111,7 +116,8 @@ const QueryForm = () => {
 
   function handleDropdownClick(event) {
     event.preventDefault();
-    console.log("dropdown click");
+
+    searchInputAnalytics();
 
     const li = event.target.closest("li");
     const { qid, value } = li.dataset;
@@ -124,9 +130,10 @@ const QueryForm = () => {
 
   function handleCreateNewGraphClick(event) {
     event.preventDefault();
-    event.stopPropagation(); 
+    event.stopPropagation();
 
-    console.log("create new graph");
+    searchInputAnalytics();
+
     const li = event.target.closest("li");
     const { qid, value } = li.dataset;
 
@@ -141,7 +148,7 @@ const QueryForm = () => {
 
   function handleAddToGraphClick(event) {
     event.preventDefault();
-    event.stopPropagation(); 
+    event.stopPropagation();
 
     // console.log("add to graph");
     const li = event.target.closest("li");
@@ -156,9 +163,18 @@ const QueryForm = () => {
     fetchGraphData(qid, createNewGraph, addNodeToGraph);
   }
 
+  function searchInputAnalytics() {
+    ga.event({
+      action: "search_input",
+      params: {
+        search_input: inputValue,
+      },
+    });
+  }
+
   return (
-    <div className="flex w-full justify-center z-20 bg-inherit">
-      <form className="relative w-full justify-center z-20 bg-inherit">
+    <div className="flex w-full justify-center z-10 bg-inherit">
+      <form className="relative w-full justify-center z-10 bg-inherit">
         <input
           type="text"
           placeholder="Search..."
@@ -166,13 +182,13 @@ const QueryForm = () => {
           onChange={handleSearchInput}
           onFocus={() => setSearchBoxIsFocused(true)}
           onBlur={() => setSearchBoxIsFocused(false)}
-          className="z-20 w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300"
+          className="z-10 w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300"
         />
         <div
           ref={searchBoxDropdownRef}
           className={
             searchBoxIsFocused
-              ? "z-20 w-full absolute top-12 overflow-y-auto h-96 rounded-md border border-indigo-300"
+              ? "z-10 w-full absolute top-12 overflow-y-auto h-96 rounded-md border border-indigo-300"
               : "hidden"
           }
         >
@@ -180,7 +196,7 @@ const QueryForm = () => {
             <ul
               className={
                 searchOptionItems !== undefined
-                  ? "z-20 w-full divide-indigo-300 divide-y divide-solid"
+                  ? "z-10 w-full divide-indigo-300 divide-y divide-solid"
                   : "hidden"
               }
             >
