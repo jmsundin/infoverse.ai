@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta
           name="description"
-          content="Infoverse AI is a platform for building and deploying AI models without writing code."
+          content="Infoverse AI: explore the world's information top-down and see the details when you want them."
         />
         <meta
           name="keywords"
