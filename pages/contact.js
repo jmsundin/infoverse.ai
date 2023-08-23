@@ -1,6 +1,7 @@
 "use client";
 
 import Head from "next/head";
+import ContactForm from "@/components/ContactForm";
 
 function ContactPage() {
   return (
@@ -8,9 +9,7 @@ function ContactPage() {
       <Head>
         <title>Infoverse AI | Contact</title>
       </Head>
-      <h1 className="flex flex-col items-center text-xl text-white">
-        Contact Page
-      </h1>
+      <ContactForm />;
     </div>
   );
 }
