@@ -1,24 +1,34 @@
 "use client";
 
-import { Fragment, useState, useRef, useContext, useEffect, use } from "react";
+import { Fragment, useState, useRef, useContext, useEffect } from "react";
 import { GraphDataContext } from "@/context/graph-data-context";
 
 import SplitPane from "@/components/SplitPane";
 import { IoClose } from "react-icons/io5";
 
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
+import { RotatingLines } from "react-loader-spinner";
 
+import QueryForm from "@/components/QueryForm";
 import Graph from "@/components/Graph";
 
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
 
 function HomePage() {
-  // const { nodeQID, setNodeQID, graphData, setGraphData } = useContext(GraphDataContext);
+  const {
+    inspiration,
+    setInspiration,
+    graphVisible,
+    setGraphVisible,
+    fetching,
+    setFetching,
+    splitPaneView,
+    setSplitPaneView,
+  } = useContext(GraphDataContext);
   const [progress, setProgress] = useState(0);
   const [pageIsLoading, setPageIsLoading] = useState(true);
   const [wikipediaPageUrl, setWikipediaPageUrl] = useState(null);
-  const [splitPaneView, setSplitPaneView] = useState(false);
   const [mainWrapperDimensions, setMainWrapperDimensions] = useState({
     width: "100vw",
     height: "100%",
@@ -53,6 +63,11 @@ function HomePage() {
     };
   }, [mainWrapperDimensions]);
 
+  function handleInspiration() {
+    setGraphVisible(true);
+    setInspiration(true);
+  }
+
   function handleSplitPaneViewClose() {
     setSplitPaneView(false);
     // setWikipediaPageUrl(null);
@@ -65,7 +80,34 @@ function HomePage() {
 
   return (
     <div className="flex w-screen h-full pt-2 pl-2 pr-2 pb-16">
-      {!splitPaneView && (
+      {!inspiration && !graphVisible && (
+        <div className="flex flex-row justify-center items-center w-full">
+          <div className="flex flex-row justify-center items-center w-full sm:w-5/6 md:w-2/3 lg:w-1/2 gap-2">
+            <QueryForm />
+            <button
+              onClick={handleInspiration}
+              className="flex text-base text-gray-200 bg-inherit hover:bg-indigo-500 rounded-lg p-2 border-2 border-indigo-500"
+            >
+              Inspiration?
+            </button>
+          </div>
+        </div>
+      )}
+
+      {fetching && (
+        <div className="flex flex-row justify-center items-center w-full">
+          <div className="flex flex-row justify-center items-center w-10 h-10">
+            <RotatingLines
+              strokeColor="white"
+              strokeWidth="5"
+              animationDuration="0.75"
+              width="96"
+              visible={true}
+            />
+          </div>
+        </div>
+      )}
+      {!splitPaneView && !fetching && graphVisible && (
         <div
           id="graphContainer"
           className="flex w-screen h-full justify-center"
@@ -73,7 +115,7 @@ function HomePage() {
           <Graph handleWikipediaPageLoad={handleWikipediaPageLoad} />
         </div>
       )}
-      {splitPaneView && (
+      {splitPaneView && graphVisible && (
         <Allotment ref={splitPaneRef} vertical={smallScreen.current}>
           <Allotment.Pane>
             <div
