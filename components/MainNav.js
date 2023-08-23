@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useContext, useRef, useState } from "react";
+import { GraphDataContext } from "@/context/graph-data-context";
 
 import Link from "next/link";
 
@@ -16,15 +17,11 @@ import {
 
 import QueryForm from "./QueryForm";
 
-const navComponents = [
-  {
-    title: "D3.js",
-    description: "About Me through Information Visualization",
-    href: "/about-me-with-d3",
-  },
-];
+// import Search Context
 
 export default function MainNav() {
+  const { inspiration, graphVisible, setGraphVisible, setInspiration } =
+    useContext(GraphDataContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const modalRef = useRef(null);
 
@@ -45,10 +42,12 @@ export default function MainNav() {
         >
           Infoverse AI
         </Link>
-        <div className="hidden sm:flex sm:flex-auto sm:justify-center sm:mx-auto sm:max-w-[600px] sm:bg-inherit">
-          <QueryForm />
-        </div>
-        <div className="hidden md:flex md:flex-initial md:justify-end md:items-center md:gap-3 md:z-20 md:mx-auto md:my-2">
+        {graphVisible && (
+          <div className="hidden sm:flex sm:flex-auto sm:justify-center sm:mx-auto sm:max-w-[600px] sm:bg-inherit">
+            <QueryForm />
+          </div>
+        )}
+        <div className="hidden md:flex md:flex-1 md:justify-end md:items-center md:gap-3 md:z-20 md:mx-auto md:my-2">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -104,7 +103,7 @@ export default function MainNav() {
                     Home
                   </p>
                 </Link>
-                <Link href="/about-me-with-d3" legacyBehavior passHref>
+                <Link href="/about" legacyBehavior passHref>
                   <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200">
                     About
                   </p>
@@ -119,9 +118,11 @@ export default function MainNav() {
           </div>
         )}
       </div>
-      <div className="sm:hidden flex flex-auto px-3 sm:max-w-[600px] sm:bg-inherit">
-        <QueryForm />
-      </div>
+      {graphVisible && (
+        <div className="sm:hidden flex flex-auto px-3 sm:max-w-[600px] sm:bg-inherit">
+          <QueryForm />
+        </div>
+      )}
     </div>
   );
 }
