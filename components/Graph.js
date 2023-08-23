@@ -132,12 +132,9 @@ function Graph({ handleWikipediaPageLoad }) {
         .select(tooltipDescriptionRef.current)
         .classed("text-base", true)
         .classed("font-normal", true)
-        .classed("mt-2", true).html(`<strong>Description:</strong> ${
-        d.data.description
-      } <br />
-        <i class="text-sm">Source: <a href="${d.data.url}" target="_blank">${
-        d.data.repository[0].toUpperCase() + d.data.repository.substring(1)
-      }</a></i>`);
+        .classed("mt-2", true)
+        .html(`<strong>Description:</strong> ${d.data.description} <br />
+        <i class="text-sm">Source: <a href="${d.data.url}" target="_blank">${d.data?.repository}</a></i>`);
       d3.select(tooltipMenuRef.current)
         .classed("flex", true)
         .classed("flex-row", true)
