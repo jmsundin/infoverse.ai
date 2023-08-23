@@ -1,19 +1,28 @@
 import { useState, useEffect, useContext, useRef, Fragment } from "react";
 import { GraphDataContext } from "@/context/graph-data-context";
 
-import { PiGraphDuotone } from "react-icons/pi";
-import { AiOutlinePlusCircle } from "react-icons/ai";
-
 import { useRouter } from "next/router";
 import * as ga from "../lib/ga";
+
+import { PiGraphDuotone } from "react-icons/pi";
+import { AiOutlinePlusCircle } from "react-icons/ai";
+import { IoClose } from "react-icons/io5";
 
 const QueryForm = () => {
   const router = useRouter();
 
   const {
+    inspiration,
+    setInspiration,
     setTopicQID: setTopicQID,
     nodes: nodes,
     fetchGraphData: fetchGraphData,
+    fetching: fetching,
+    setFetching: setFetching,
+    graphVisible,
+    setGraphVisible,
+    splitPaneView,
+    setSplitPaneView,
   } = useContext(GraphDataContext);
 
   let i = 0;
@@ -35,6 +44,8 @@ const QueryForm = () => {
     });
     i++;
   }
+  initialSearchOptions.shift(); // remove "entity" search option
+  initialSearchOptions.shift(); // removing "film" because it isn't loading properly
   const [searchOptions, setSearchOptions] = useState(initialSearchOptions);
   const [searchOptionItems, setSearchOptionItems] =
     useState(initialSearchOptions);
@@ -114,6 +125,12 @@ const QueryForm = () => {
     };
   }
 
+  function handleInputDelete(event) {
+    event.preventDefault();
+    setInputValue("");
+    setSearchBoxIsFocused(false);
+  }
+
   function handleDropdownClick(event) {
     event.preventDefault();
 
@@ -122,10 +139,15 @@ const QueryForm = () => {
     const li = event.target.closest("li");
     const { qid, value } = li.dataset;
 
+    setFetching(true);
+    fetchGraphData(qid);
     setTopicQID(qid);
     setInputValue(value);
     setSearchBoxIsFocused(false);
-    fetchGraphData(qid);
+
+    if (fetching === false) {
+      setGraphVisible(true);
+    }
   }
 
   function handleCreateNewGraphClick(event) {
@@ -172,17 +194,48 @@ const QueryForm = () => {
     });
   }
 
+  function handleSubmitSearch(event) {
+    event.preventDefault();
+    // console.log("searchOptions:", searchOptions);
+
+    // TODO: best match search option
+
+    searchOptions.find((option) => {
+      if (option.label === inputValue) {
+        const createNewGraph = true;
+        const addNodeToGraph = false;
+        setFetching(true);
+        fetchGraphData(option.id, createNewGraph, addNodeToGraph);
+        setTopicQID(option.id);
+        setSearchBoxIsFocused(false);
+        if (fetching === false) {
+          setGraphVisible(true);
+        }
+      }
+    });
+
+    searchInputAnalytics();
+  }
+
   return (
     <div className="flex w-full justify-center z-10 bg-inherit">
-      <form className="relative w-full justify-center z-10 bg-inherit">
+      <form
+        onSubmit={handleSubmitSearch}
+        className="relative w-full justify-center z-10 bg-inherit"
+      >
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="What topic would you like to explore?"
           value={inputValue}
           onChange={handleSearchInput}
           onFocus={() => setSearchBoxIsFocused(true)}
           onBlur={() => setSearchBoxIsFocused(false)}
           className="z-10 w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300"
+        />
+        <IoClose
+          className="z-10 absolute top-1.5 right-1 cursor-pointer h-8 w-8 fill-gray-400 hover:fill-gray-200"
+          onClick={handleInputDelete}
+          onTouchStart={handleInputDelete}
         />
         <div
           ref={searchBoxDropdownRef}
