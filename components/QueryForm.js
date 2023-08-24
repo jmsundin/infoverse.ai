@@ -241,7 +241,7 @@ const QueryForm = () => {
           ref={searchBoxDropdownRef}
           className={
             searchBoxIsFocused
-              ? "z-10 w-full absolute top-12 overflow-y-auto h-96 rounded-md border border-indigo-300"
+              ? "z-10 w-full absolute top-12 overflow-y-auto h-[300px] rounded-md border border-indigo-300"
               : "hidden"
           }
         >
