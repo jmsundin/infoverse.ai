@@ -82,13 +82,13 @@ function HomePage() {
     <div className="flex w-screen h-full pt-2 pl-2 pr-2 pb-16">
       {!inspiration && !graphVisible && (
         <div className="flex flex-row justify-center items-center w-full">
-          <div className="flex flex-row justify-center items-center w-full sm:w-5/6 md:w-2/3 lg:w-1/2 gap-2">
+          <div className="flex flex-col justify-center items-center w-full sm:w-5/6 md:w-2/3 lg:w-1/2 gap-2">
             <QueryForm />
             <button
               onClick={handleInspiration}
               className="flex text-base text-gray-200 bg-inherit hover:bg-indigo-500 rounded-lg p-2 border-2 border-indigo-500"
             >
-              Inspiration?
+              Want Inspiration?
             </button>
           </div>
         </div>
