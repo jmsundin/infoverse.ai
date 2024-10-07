@@ -10,7 +10,7 @@ import { IoClose } from "react-icons/io5";
 import { RotatingLines } from "react-loader-spinner";
 
 import QueryForm from "@/components/QueryForm";
-import Graph from "@/components/Graph";
+import MyGraph from "@/components/MyGraph";
 
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
@@ -112,7 +112,7 @@ function HomePage() {
           id="graphContainer"
           className="flex w-screen h-full justify-center"
         >
-          <Graph handleWikipediaPageLoad={handleWikipediaPageLoad} />
+          <MyGraph handleWikipediaPageLoad={handleWikipediaPageLoad} />
         </div>
       )}
       {splitPaneView && graphVisible && (
@@ -122,7 +122,7 @@ function HomePage() {
               id="graphContainer"
               className="relative flex flex-1 h-full w-screen justify-center"
             >
-              <Graph handleWikipediaPageLoad={handleWikipediaPageLoad} />
+              <MyGraph handleWikipediaPageLoad={handleWikipediaPageLoad} />
             </div>
           </Allotment.Pane>
           <Allotment.Pane>

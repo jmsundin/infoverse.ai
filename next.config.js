@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack(config, options) {
+    config.module.rules.forEach((rule) => {
+      if (rule.loader === "babel-loader") {
+        rule.use = [];
+      }
+    });
+    return config;
+  },
   async headers() {
     return [
       {

@@ -1,15 +1,25 @@
-# Infoverse AI
+# Infoverse
 
-Infoverse AI's mission is to provide users flexible views and interfaces to interact with information -- from any perspective they want.
+## Mission
 
-## Technology
+The mission is to help everyone find and use information intuitively.
 
-- React
-- Next.js
-- D3.js
-- Tailwind CSS
-- Vercel
-- Git
+## Values
 
-- SPARQL
-- Wikidata.org
+- Openness
+- Simplicity
+- Privacy
+- Community
+- Inclusiveness
+- Accessibility
+- Fun
+
+## Goals
+
+- Make information easy to find
+- Make information easy to use
+- Make information easy to share
+- Make information easy to understand
+- Make information easy to connect
+- Make information easy to learn
+- Make information easy to remember

@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, useRef, Fragment } from "react";
 import { GraphDataContext } from "@/context/graph-data-context";
+import { mapNodesToSearchOptions } from "@/lib/utils";
 
 import { useRouter } from "next/router";
 import * as ga from "../lib/ga";
@@ -28,24 +29,13 @@ const QueryForm = () => {
   let i = 0;
   let initialSearchOptions = null;
   if (i === 0) {
-    initialSearchOptions = nodes.map((node) => {
-      const item = node.data;
-      return {
-        qid: item.qid,
-        value: item.label,
-        aliases: item.aliases,
-        label: item.label,
-        description: item.description,
-        url: item.url,
-        uri: item.uri,
-        pageId: item.pageId,
-        respository: item.respository,
-      };
-    });
+    initialSearchOptions = mapNodesToSearchOptions(nodes);
     i++;
   }
+
   initialSearchOptions.shift(); // remove "entity" search option
   initialSearchOptions.shift(); // removing "film" because it isn't loading properly
+
   const [searchOptions, setSearchOptions] = useState(initialSearchOptions);
   const [searchOptionItems, setSearchOptionItems] =
     useState(initialSearchOptions);
@@ -218,10 +208,10 @@ const QueryForm = () => {
   }
 
   return (
-    <div className="flex w-full justify-center z-10 bg-inherit">
+    <div className="flex w-full justify-center z-20 bg-inherit">
       <form
         onSubmit={handleSubmitSearch}
-        className="relative w-full justify-center z-10 bg-inherit"
+        className="relative w-full justify-center z-20 bg-inherit"
       >
         <input
           type="text"
@@ -230,7 +220,7 @@ const QueryForm = () => {
           onChange={handleSearchInput}
           onFocus={() => setSearchBoxIsFocused(true)}
           onBlur={() => setSearchBoxIsFocused(false)}
-          className="z-10 w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300"
+          className="z-10 w-full px-4 py-2 text-gray-200 placeholder:text-gray-200 bg-inherit border border-indigo-500 border-2 rounded-md focus:outline-none focus:border-indigo-300 flex flex-auto px-3 min-w-[320px] sm:bg-inherit"
         />
         <IoClose
           className="z-10 absolute top-1.5 right-1 cursor-pointer h-8 w-8 fill-gray-400 hover:fill-gray-200"
@@ -249,7 +239,7 @@ const QueryForm = () => {
             <ul
               className={
                 searchOptionItems !== undefined
-                  ? "z-10 w-full divide-indigo-300 divide-y divide-solid"
+                  ? "z-20 w-full divide-indigo-300 divide-y divide-solid"
                   : "hidden"
               }
             >

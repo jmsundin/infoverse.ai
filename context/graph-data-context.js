@@ -8,6 +8,7 @@ import { parseWikidata } from "@/lib/parseWikidata";
 import { initialGraphData, data } from "@/data/suggestedTopics";
 
 import { hierarchy } from "d3-hierarchy";
+import { mergeSubgraph } from "@/lib/graph-utils";
 
 export const GraphDataContext = createContext();
 
@@ -19,9 +20,9 @@ function GraphDataProvider({ children }) {
   const [root, setRoot] = useState(initialRoot);
   const [nodes, setNodes] = useState(initialNodes);
   const [links, setLinks] = useState(initialLinks);
-  const [prevRoot, setPrevRoot] = useState(initialRoot);
-  const [prevNodes, setPrevNodes] = useState(initialNodes);
-  const [prevLinks, setPrevLinks] = useState(initialLinks);
+  const [previousRoot, setPreviousRoot] = useState(initialRoot);
+  const [previousNodes, setPreviousNodes] = useState(initialNodes);
+  const [previousLinks, setPreviousLinks] = useState(initialLinks);
   const [inspiration, setInspiration] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false);
@@ -36,16 +37,16 @@ function GraphDataProvider({ children }) {
     else setGraphVisible(false);
   }
 
-  if (prevRoot !== root) {
-    setPrevRoot(root);
+  if (previousRoot !== root) {
+    setPreviousRoot(root);
   }
 
-  if (prevNodes !== nodes) {
-    setPrevNodes(nodes);
+  if (previousNodes !== nodes) {
+    setPreviousNodes(nodes);
   }
 
-  if (prevLinks !== links) {
-    setPrevLinks(links);
+  if (previousLinks !== links) {
+    setPreviousLinks(links);
   }
 
   async function fetchGraphData(
@@ -69,57 +70,17 @@ function GraphDataProvider({ children }) {
       setNodes(newNodes);
       setLinks(newLinks);
     } else if (addAsSubgraph) {
-      addSubgraph(newRoot, newNodes, newLinks);
+      const { nodes, links } = mergeSubgraph(
+        newRoot,
+        newNodes,
+        newLinks,
+        previousRoot,
+        previousNodes
+      );
+      setRoot(newRoot);
+      setNodes(nodes);
+      setLinks(links);
     }
-  }
-
-  function addSubgraph(newRoot, newNodes, newLinks) {
-    console.log("newRoot:", newRoot);
-    console.log("newNodes:", newNodes);
-    console.log("newLinks:", newLinks);
-
-    const prevRoot = root;
-    const prevNodes = nodes;
-    console.log("prevNodes:", prevNodes);
-
-    const prevNodeQIDs = prevNodes.map((node) => node.data.qid);
-    const uniqueNewNodes = newNodes.filter(
-      (node) => !prevNodeQIDs.includes(node.data.qid)
-    );
-
-    console.log("number of new nodes:", newNodes.length);
-    console.log("unique new nodes:", uniqueNewNodes);
-
-    const updatedPrevNodesWithChildren =
-      prevNodes.length === 0
-        ? uniqueNewNodes
-        : prevNodes.map((node) => {
-            uniqueNewNodes.forEach((uniqueNewNode) => {
-              if (uniqueNewNode.depth !== 0) {
-                if (uniqueNewNode.parent.data.qid === node.data.qid) {
-                  if (node.children === undefined) node.children = [];
-                  node.children.push(uniqueNewNode);
-                  node.data.children.push(uniqueNewNode);
-                  return node;
-                }
-              }
-            });
-            return node;
-          });
-
-    console.log(
-      "updated prev nodes with children:",
-      updatedPrevNodesWithChildren
-    );
-    const updatedGraphData = updatedPrevNodesWithChildren;
-
-    const updatedRoot = hierarchy(updatedGraphData);
-    console.log("updated root:", updatedRoot);
-    const updatedNodes = updatedRoot.descendants();
-    const updatedLinks = updatedRoot.links();
-    setRoot(updatedRoot);
-    setNodes(updatedNodes);
-    setLinks(updatedLinks);
   }
 
   const graphContext = {
@@ -138,9 +99,9 @@ function GraphDataProvider({ children }) {
     root: root,
     nodes: nodes,
     links: links,
-    prevRoot: prevRoot,
-    prevNodes: prevNodes,
-    prevLinks: prevLinks,
+    prevRoot: previousRoot,
+    prevNodes: previousNodes,
+    prevLinks: previousLinks,
   };
 
   return (

@@ -2,6 +2,8 @@
 
 import { Fragment, useRef, useState, useEffect, useContext } from "react";
 import { GraphDataContext } from "@/context/graph-data-context";
+import useTooltip from "@/components/useTooltip";
+import useSimulation from "@/components/useSimulation";
 
 import * as d3 from "d3";
 
@@ -9,7 +11,10 @@ import { BsWikipedia } from "react-icons/bs";
 import { PiGraphDuotone } from "react-icons/pi";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
-function Graph({ handleWikipediaPageLoad }) {
+import Graph from "graphology";
+import forceAtlas2 from "graphology-layout-forceatlas2";
+
+function MyGraph({ handleWikipediaPageLoad }) {
   const {
     root: root,
     nodes: nodes,
@@ -17,17 +22,13 @@ function Graph({ handleWikipediaPageLoad }) {
     fetchGraphData: fetchGraphData,
   } = useContext(GraphDataContext);
 
-  const tooltipRef = useRef();
-  const tooltipTitleRef = useRef();
-  const tooltipDescriptionRef = useRef();
+  const { tooltipRef, tooltipTitleRef, tooltipDescriptionRef } = useTooltip();
   const tooltipMenuRef = useRef();
   const tooltipWikipediaIconRef = useRef();
   const subtopicsRef = useRef();
   const svgRef = useRef(null);
 
-  const simulationRef = useRef();
-  const nodeGroupRef = useRef();
-  const linkGroupRef = useRef();
+  const { simulationRef, nodeElementsRef, linkElementsRef } = useSimulation();
 
   const [focusedNodeQID, setFocusedNodeQID] = useState("");
   const [wikipediaPageUrl, setWikipediaPageUrl] = useState("");
@@ -61,17 +62,17 @@ function Graph({ handleWikipediaPageLoad }) {
     const linkSelection = d3.selectAll("line").data(links);
 
     const nodeSelection = d3
-      .select(nodeGroupRef.current)
+      .select(nodeElementsRef.current)
       .selectAll("g")
       .data(nodes);
 
     const rectSelection = d3
-      .select(nodeGroupRef.current)
+      .select(nodeElementsRef.current)
       .selectAll("rect")
       .data(nodes);
 
     const nodeTextSelection = d3
-      .select(nodeGroupRef.current)
+      .select(nodeElementsRef.current)
       .selectAll("text")
       .data(nodes);
 
@@ -393,7 +394,7 @@ function Graph({ handleWikipediaPageLoad }) {
         className="bg-gradrient-to-r from-indigo-300 to-indigo-100 mx-auto"
       >
         <g id="container">
-          <g id="linkGroup" ref={linkGroupRef}>
+          <g id="linkGroup" ref={linkElementsRef}>
             {links.length > 0 &&
               links.map((link) => {
                 return (
@@ -408,7 +409,7 @@ function Graph({ handleWikipediaPageLoad }) {
               })}
           </g>
 
-          <g id="nodeGroup" ref={nodeGroupRef}>
+          <g id="nodeGroup" ref={nodeElementsRef}>
             {nodes.length > 0 &&
               nodes.map((node) => {
                 return <Node key={"node__" + node.data.qid} data={node.data} />;
@@ -459,4 +460,4 @@ function Node({ data }) {
   );
 }
 
-export default Graph;
+export default MyGraph;

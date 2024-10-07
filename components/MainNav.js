@@ -34,16 +34,18 @@ export default function MainNav() {
   };
 
   return (
-    <div id="header-nav" className="z-20 flex flex-col">
-      <div className="flex flex-row justify-between items-center w-full gap-3 pt-3 pl-3 pr-3 bg-inherit">
+    <div id="header-nav" className="z-20 flex flex-col h-32">
+      <div className="relative flex flex-row justify-between items-center w-full gap-3 pt-4 px-4 bg-inherit">
         <Link
           href="/"
-          className="flex flex-1 sm:flex-initial items-start hover:cursor-pointer hover:text-indigo-200 text-3xl text-white font-bold hover:text-indigo-200 r tracking-tight lg:text-4xl z-20"
+          className="flex flex-1 sm:flex-initial items-start hover:cursor-pointer hover:text-indigo-200 text-3xl text-white 
+          font-bold hover:text-indigo-200 tracking-tight z-20 whitespace-nowrap"
         >
           Infoverse AI
         </Link>
         {graphVisible && (
-          <div className="hidden sm:flex sm:flex-auto sm:justify-center sm:mx-auto sm:max-w-[600px] sm:bg-inherit">
+          <div className="absolute top-16 left-0 right-0 flex flex-auto justify-center w-full px-4 bg-inherit lg:static lg:flex-auto 
+          lg:justify-center lg:mx-auto lg:bg-inherit">
             <QueryForm />
           </div>
         )}
@@ -118,11 +120,7 @@ export default function MainNav() {
           </div>
         )}
       </div>
-      {graphVisible && (
-        <div className="sm:hidden flex flex-auto px-3 sm:max-w-[600px] sm:bg-inherit">
-          <QueryForm />
-        </div>
-      )}
+      {/* {graphVisible && <QueryForm />} */}
     </div>
   );
 }
