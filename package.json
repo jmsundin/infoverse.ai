@@ -41,7 +41,8 @@
     "react-style-proptype": "^3.2.2",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.6",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "webcola": "^3.4.0"
   },
   "devDependencies": {
     "@types/node": "20.4.9",
