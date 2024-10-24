@@ -13,6 +13,8 @@ import { mergeSubgraph } from "@/lib/graph-utils";
 export const GraphDataContext = createContext();
 
 function GraphDataProvider({ children }) {
+  // const [graph, setGraph] = useState(new Graph());
+
   const initialRoot = hierarchy(data);
   const initialNodes = initialRoot.descendants();
   const initialLinks = initialRoot.links();

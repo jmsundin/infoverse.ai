@@ -12,7 +12,7 @@ import { PiGraphDuotone } from "react-icons/pi";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
 import Graph from "graphology";
-import forceAtlas2 from "graphology-layout-forceatlas2";
+import * as cola from 'webcola';
 
 function MyGraph({ handleWikipediaPageLoad }) {
   const {
@@ -43,19 +43,16 @@ function MyGraph({ handleWikipediaPageLoad }) {
     const nodePaddingX = 60;
     const nodePaddingY = 20;
 
-    const simulation = d3
-      .forceSimulation(nodes)
-      .force(
-        "link",
-        d3
-          .forceLink(links)
-          .id((d) => d.data.qid)
-          .distance(300)
-          .strength(0.1)
-      )
-      .force("collide", d3.forceCollide().radius(100))
-      .force("charge", d3.forceManyBody().strength(-100))
-      .force("center", d3.forceCenter(width.current / 2, height.current / 2));
+    const d3ColaLayout = cola
+      .d3adaptor(d3)
+      .size([width, height])
+      .nodes(nodes)
+      .links(links)
+      .constraints(graph.constraints)
+      .avoidOverlaps(true)
+      .handleDisconnected(false)
+      .jaccardLinkLengths(100, 0.7)
+      .start(50, 0, 0);
 
     const svgSelection = d3.select(svgRef.current);
 
@@ -110,8 +107,7 @@ function MyGraph({ handleWikipediaPageLoad }) {
 
     nodeSelection
       .on("mouseover", handleNodeClick)
-      .on("touchstart", handleNodeClick)
-      .call(drag(simulation));
+      .on("touchstart", handleNodeClick);
 
     function handleNodeClick(e, d) {
       e.stopPropagation();
@@ -174,9 +170,6 @@ function MyGraph({ handleWikipediaPageLoad }) {
         return nodeHeight / 2 + nodeTextHeight / 4 + "px";
       });
 
-    const tooltipSelection = d3.select(tooltipRef.current);
-    const containerSelection = d3.select("#container").call(drag(simulation));
-
     svgSelection.on("pointerdown", handleSvgClick);
 
     function handleSvgClick(e, d) {
@@ -187,104 +180,18 @@ function MyGraph({ handleWikipediaPageLoad }) {
       }
     }
 
-    const zoom = d3.zoom().on("zoom", handleZoom);
+    colaLayout.on('tick', () => {
+      nodes
+        .attr('cx', (d) => d.x)
+        .attr('cy', (d) => d.y);
+    
+      links
+        .attr('x1', (d) => d.source.x)
+        .attr('y1', (d) => d.source.y)
+        .attr('x2', (d) => d.target.x)
+        .attr('y2', (d) => d.target.y);
+    });
 
-    function drag(simulation) {
-      function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        if (d === undefined) return;
-        d.fx = d?.x;
-        d.fy = d?.y;
-      }
-
-      function dragged(event, d) {
-        if (d === undefined) return;
-        d.fx = event.x;
-        d.fy = event.y;
-      }
-
-      function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        if (d === undefined) return;
-        d.fx = null;
-        d.fy = null;
-      }
-      return d3
-        .drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended);
-    }
-
-    function handleZoom(event) {
-      d3.select("#container").attr("transform", event.transform);
-    }
-
-    function initZoom() {
-      d3.select(svgRef.current).call(zoom);
-    }
-
-    initZoom();
-
-    simulation.on("tick", tick);
-
-    function tick() {
-      try {
-        nodeSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
-      } catch (error) {
-        console.log(error);
-      }
-      try {
-        rectSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
-      } catch (error) {
-        console.log(error);
-      }
-      try {
-        nodeTextSelection.attr("x", (d) => d.x).attr("y", (d) => d.y);
-      } catch (error) {
-        console.log(error);
-      }
-
-      try {
-        linkSelection
-          .attr("x1", (d) => {
-            const nodeWidth = d3
-              .select(`#node__${d.source.data.qid}`)
-              .node()
-              .getBBox().width;
-            return d.source.x + nodeWidth / 2;
-          })
-          .attr("y1", (d) => {
-            const nodeHeight = d3
-              .select(`#node__${d.source.data.qid}`)
-              .node()
-              .getBBox().height;
-            return d.source.y + nodeHeight / 2;
-          })
-          .attr("x2", (d) => {
-            const nodeWidth = d3
-              .select(`#node__${d.target.data.qid}`)
-              .node()
-              .getBBox().width;
-            return d.target.x + nodeWidth / 2;
-          })
-          .attr("y2", (d) => {
-            const nodeHeight = d3
-              .select(`#node__${d.target.data.qid}`)
-              .node()
-              .getBBox().height;
-            return d.target.y + nodeHeight / 2;
-          });
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    simulationRef.current = simulation;
-
-    return () => {
-      simulation.stop();
-    };
   }, [nodes, links, fetchGraphData]);
 
   useEffect(() => {
