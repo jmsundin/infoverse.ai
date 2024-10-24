@@ -20,6 +20,9 @@ function AboutPage() {
       <div className="flex flex-col items-center gap-8 text-white mt-5">
         <div className="flex flex-wrap justify-center items-center gap-8">
           <div className="flex flex-col w-3/4 sm:w-2/3 md:w-1/2 items-center text-black bg-indigo-200 drop-shadow-md rounded-lg p-3">
+            <video controls autoPlay muted loop className="rounded-lg">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Generative_AI_explained_in_2_minutes.webm" type="video/webm" />
+            </video>
             <h2 className="text-2xl">Vision</h2>
             <p className="indent-8">
               To help people explore the world of information, to help people
