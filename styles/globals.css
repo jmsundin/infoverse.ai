@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  height: 100%;
+  min-height: 100vh;
+}
+
 .graphin-components-tooltip.top {
   transform: translate(0, -100%);
 }
