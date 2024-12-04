@@ -9,13 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+} from "components/ui/dialog";
+import { Progress } from "components/ui/progress";
+import { Card } from "components/ui/card";
+import { Label } from "components/ui/label";
+import { Input } from "components/ui/input";
+import { Textarea } from "components/ui/textarea";
+import { Button } from "components/ui/button";
 
 function ContactForm() {
   const openDialogRef = useRef(null);

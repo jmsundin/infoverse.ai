@@ -8,7 +8,7 @@ function Footer() {
   return (
     <footer
       id="footer"
-      className="z-20 h-14 absolute bottom-0 left-0 right-0 bg-gradient-to-r from-indigo-950 to-indigo-500"
+      className="z-20 h-14 sticky absolute bottom-0 left-0 right-0 bg-gradient-to-r from-indigo-950 to-indigo-500"
     >
       <div className="flex flex-row justify-center text-white">
         <div className="bg-gradient-to-r from-gray-500 to-white h-0.5 w-5/6 mx-auto">
@@ -45,7 +45,7 @@ function Footer() {
             </div>
             <div className="text-gray-200 text-base font-bold flex justify-center items-center gap-2">
               <RiCopyrightLine className="inline-block" />{" "}
-              <span>Infoverse AI 2023</span>
+              <span>infoverse 2024</span>
             </div>
           </div>
         </div>

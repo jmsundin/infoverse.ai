@@ -1,4 +1,30 @@
-export var data = {
+interface SuggestedTopic {
+  qid: string;
+  value: string;
+  aliases: string[];
+  label: string;
+  description: string;
+  uri: string;
+  url: string;
+  repository: string;
+  pageId: number | null;
+  children: SuggestedTopic[];
+}
+
+interface Node {
+  parent: string | null;
+  qid: string;
+  value: string;
+  label: string;
+  description: string;
+  uri: string;
+  url: string;
+  pageId: number | null;
+  repository: string;
+  children: Node[];
+}
+
+export var data: SuggestedTopic = {
   qid: "Q35120",
   value: "entity",
   label: "entity",
@@ -7,6 +33,7 @@ export var data = {
   uri: "https://www.wikidata.org/entity/Q35120",
   url: "https://www.wikidata.org/wiki/Q35120",
   repository: "wikidata",
+  pageId: null,
   children: [
     {
       qid: "Q11424",
@@ -256,6 +283,7 @@ export var data = {
     {
       qid: "Q188451",
       value: "Music genre",
+      aliases: ["Music genre"],
       label: "music genre",
       description:
         "category that identifies pieces of music as belonging to a shared tradition or set of conventions",
@@ -407,9 +435,10 @@ export var data = {
 };
 
 function createGraphWithSuggestedTopics() {
-  const obj = data.shift();
+  const obj = data.children.shift();
   if (obj === undefined || obj === null) return null;
-  const root = {
+
+  const root: Node = {
     parent: null,
     qid: obj.qid,
     value: obj.value,
@@ -422,15 +451,19 @@ function createGraphWithSuggestedTopics() {
     children: [],
   };
 
-  while (data.length > 0) {
-    const child = data.shift();
-    let newNode = {
+  while (data.children.length > 0) {
+    const child = data.children.shift();
+    if (child === undefined || child === null) continue;
+    let newNode: Node = {
       parent: root.qid,
       qid: child.qid,
       value: child.value,
       label: child.label,
       description: child.description,
       uri: child.uri,
+      url: child.url,
+      pageId: child.pageId,
+      repository: child.repository,
       children: [],
     };
     root.children.push(newNode);

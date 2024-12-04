@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useContext, useRef, useState } from "react";
-import { GraphDataContext } from "@/context/graph-data-context";
+import { AppContext } from "@/context/AppContext";
 
 import Link from "next/link";
 
@@ -13,15 +13,15 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from "components/ui/navigation-menu";
 
 import QueryForm from "./QueryForm";
 
 // import Search Context
 
 export default function MainNav() {
-  const { inspiration, graphVisible, setGraphVisible, setInspiration } =
-    useContext(GraphDataContext);
+  const { setGraphData, queryFormInitialPosition, setQueryFormInitialPosition } =
+    useContext(AppContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const modalRef = useRef(null);
 
@@ -34,21 +34,19 @@ export default function MainNav() {
   };
 
   return (
-    <div id="header-nav" className="z-20 flex flex-col h-32">
+    <div id="header-nav" className="z-20 flex flex-col flex-wrap">
       <div className="relative flex flex-row justify-between items-center w-full gap-3 pt-4 px-4 bg-inherit">
         <Link
           href="/"
-          className="flex flex-1 sm:flex-initial items-start hover:cursor-pointer hover:text-indigo-200 text-3xl text-white 
+          onClick={() => {
+            setQueryFormInitialPosition(true);
+            setGraphData(null);
+          }}
+          className="flex flex-1 items-start hover:cursor-pointer hover:text-indigo-200 text-3xl text-white 
           font-bold hover:text-indigo-200 tracking-tight z-20 whitespace-nowrap"
         >
-          Infoverse AI
+          infoverse
         </Link>
-        {graphVisible && (
-          <div className="absolute top-16 left-0 right-0 flex flex-auto justify-center w-full px-4 bg-inherit lg:static lg:flex-auto 
-          lg:justify-center lg:mx-auto lg:bg-inherit">
-            <QueryForm />
-          </div>
-        )}
         <div className="hidden md:flex md:flex-1 md:justify-end md:items-center md:gap-3 md:z-20 md:mx-auto md:my-2">
           <NavigationMenu>
             <NavigationMenuList>
@@ -77,7 +75,7 @@ export default function MainNav() {
           </NavigationMenu>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Hamburger Menu */}
         {!isMenuOpen && (
           <RiMenu3Line
             className="md:hidden z-20 flex items-end relative text-white text-3xl cursor-pointer hover:fill-indigo-200"
@@ -89,17 +87,17 @@ export default function MainNav() {
             ref={modalRef}
             className="z-20 absolute top-0 right-0 flex flex-col w-full h-full p-2 bg-gradient-to-r from-indigo-950 to-indigo-500"
           >
-            <div className="flex flex-row justify-end">
+            <div className="z-20 flex flex-row justify-end">
               <RiCloseLine
-                className="flex flex-row text-white text-4xl cursor-pointer hover:fill-indigo-200 "
+                className="z-20 flex flex-row text-white text-4xl cursor-pointer hover:fill-indigo-200 "
                 onClick={showModalMenu}
               />
             </div>
             <div
-              className="flex flex-row w-full justify-center"
+              className="z-20 flex flex-row w-full justify-center bg-inherit"
               onClick={() => setIsMenuOpen(false)}
             >
-              <div className="flex flex-col w-1/2 justify-center items-center gap-4">
+              <div className="z-20 flex flex-col w-1/2 justify-center items-center gap-4">
                 <Link href="/" legacyBehavior passHref>
                   <p className="font-bold text-2xl text-white p-2 cursor-pointer hover:text-indigo-200 ">
                     Home
@@ -120,7 +118,6 @@ export default function MainNav() {
           </div>
         )}
       </div>
-      {/* {graphVisible && <QueryForm />} */}
     </div>
   );
 }

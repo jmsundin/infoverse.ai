@@ -4,7 +4,7 @@ export default function Document({ children }) {
   return (
     <Html lang="en">
       <Head />
-      <body className="w-screen h-screen border-box">
+      <body className="flex w-screen min-h-screen h-screen border-box">
         <Main />
         <NextScript />
       </body>

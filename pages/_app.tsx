@@ -7,11 +7,10 @@ import { useEffect } from "react";
 
 export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    document
-      .getElementById("__next")
-      .classList.add(
+    document.getElementById("__next")?.classList.add(
         "w-screen",
-        "h-full",
+        "min-h-screen",
+        "h-screen",
         "relative",
         "box-border",
         "flex",
